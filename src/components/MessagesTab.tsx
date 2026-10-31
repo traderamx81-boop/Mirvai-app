@@ -182,20 +182,34 @@ export const MessagesTab: React.FC<MessagesTabProps> = ({
             return (
               <div
                 key={msg.id}
-                className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full`}
+                className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full group`}
               >
+                {/* Subtle header label with sender and time context */}
+                <div className={`flex items-center gap-1.5 px-2 mb-1 text-[10px] tracking-wide ${
+                  isUser ? 'text-[#cca25d]/90 font-medium' : 'text-[#8ea496] font-medium'
+                }`}>
+                  <span>{isUser ? 'You' : 'Mirvai Property Desk'}</span>
+                  <span className="opacity-40">·</span>
+                  <span className="text-[#647c6e] font-normal">{msg.time}</span>
+                </div>
+
+                {/* Bubble with integrated subtle timestamp indicator */}
                 <div
-                  className={`max-w-[92%] sm:max-w-[78%] md:max-w-[68%] p-4 rounded-2xl text-sm sm:text-[15px] leading-relaxed shadow-md transition-all ${
+                  className={`max-w-[92%] sm:max-w-[78%] md:max-w-[68%] p-3.5 sm:p-4 rounded-2xl text-sm sm:text-[15px] leading-relaxed shadow-md transition-all relative ${
                     isUser
                       ? 'bg-[#cca25d] text-[#0a1711] font-medium rounded-br-xs'
                       : 'bg-[#0f241a] text-[#e3ece7] border border-[#1d3d2c] rounded-bl-xs'
                   }`}
                 >
-                  {msg.text}
-                </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-[#6d8275] px-1.5 mt-1">
-                  <span>{msg.time}</span>
-                  {isUser && <CheckCheck className="w-3.5 h-3.5 text-[#cca25d]" />}
+                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                  
+                  {/* Subtle timestamp label inside the bubble */}
+                  <div className={`flex items-center justify-end gap-1.5 mt-1.5 pt-0.5 text-[10px] tracking-tight select-none ${
+                    isUser ? 'text-[#384a3e]' : 'text-[#718d7c]'
+                  }`}>
+                    <span>{msg.time}</span>
+                    {isUser && <CheckCheck className="w-3.5 h-3.5 text-[#243329]" />}
+                  </div>
                 </div>
               </div>
             );
