@@ -1,0 +1,6 @@
+{
+  "name": "Mirvai Realty & Investment",
+  "description": "Premium real estate acquisition, diaspora desk, and verified investment properties with seamless user authentication and data privacy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

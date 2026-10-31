@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "Mirvai Realty & Investment",
+  "short_name": "Mirvai",
+  "description": "Premium real estate acquisition, diaspora desk, and verified investment properties with seamless user authentication and data privacy.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#07130e",
+  "theme_color": "#07130e",
+  "icons": [
+    {
+      "src": "/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

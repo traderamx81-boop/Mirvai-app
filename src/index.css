@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --brand-bg: #07130e;
+    --brand-surface: #0e2017;
+    --brand-surface-elevated: #142c20;
+    --brand-gold: #c69a58;
+    --brand-gold-hover: #d8aa65;
+    --brand-border: #1a382a;
+    --brand-text-muted: #8fa397;
+  }
+
+  body {
+    background-color: #07130e;
+    color: #e5ece8;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-editorial {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .font-brand {
+    font-family: 'Cinzel', serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #081510;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c3d2e;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c69a58;
+}
+
+/* Glass & Glow */
+.mirvai-card {
+  background-color: #0d1e16;
+  border: 1px solid rgba(198, 154, 88, 0.12);
+}
+
+.mirvai-gold-gradient {
+  background: linear-gradient(135deg, #dfb877 0%, #c69a58 50%, #997334 100%);
+}
+
+.mirvai-gold-text {
+  background: linear-gradient(135deg, #f7d99f 0%, #c69a58 50%, #dfb877 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
