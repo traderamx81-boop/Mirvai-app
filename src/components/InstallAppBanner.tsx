@@ -54,9 +54,9 @@ export const InstallAppBanner: React.FC = () => {
 
   return (
     <>
-      <div className="w-full bg-gradient-to-r from-[#0c2417] via-[#102b1c] to-[#0c2417] border-b border-[#cca25d]/20 px-4 py-2 flex items-center justify-between text-xs z-50">
+      <div className="w-full bg-[#0e1f16] border-b border-[#183324] px-4 py-2 flex items-center justify-between text-xs z-50">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg overflow-hidden border border-[#cca25d]/40 shrink-0">
+          <div className="w-7 h-7 rounded-lg overflow-hidden border border-[#d5a55d]/40 shrink-0">
             <img
               src="/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg"
               alt="Mirvai App"
@@ -64,15 +64,15 @@ export const InstallAppBanner: React.FC = () => {
             />
           </div>
           <div className="truncate">
-            <span className="font-bold text-[#f2e7d3]">Mirvai Mobile App</span>
-            <span className="text-[#8fa397] ml-2 hidden sm:inline">Install for offline vaults and instant alerts</span>
+            <span className="font-bold text-[#f0eee8]">Mirvai Mobile App</span>
+            <span className="text-[#82998c] ml-2 hidden sm:inline">Install for offline vaults and instant alerts</span>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleInstallClick}
-            className="px-3 py-1 rounded-full bg-[#cca25d] text-[#0a1711] font-bold text-xs hover:bg-[#d8b06b] transition-colors flex items-center gap-1.5 shadow-sm"
+            className="px-3 py-1 rounded-full bg-[#d5a55d] text-[#101f16] font-bold text-xs hover:bg-[#deb26d] transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Install App</span>
@@ -80,7 +80,7 @@ export const InstallAppBanner: React.FC = () => {
           <button
             onClick={() => setDismissed(true)}
             aria-label="Dismiss banner"
-            className="w-6 h-6 rounded-full flex items-center justify-center text-[#7d9586] hover:text-[#cad8cf]"
+            className="w-6 h-6 rounded-full flex items-center justify-center text-[#63786b] hover:text-[#e3eee7] cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>

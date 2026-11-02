@@ -15,7 +15,7 @@ export const MirvaiLogo: React.FC<MirvaiLogoProps> = ({
 }) => {
   if (variant === 'monogram') {
     return (
-      <div className={`relative flex items-center justify-center rounded-xl overflow-hidden border border-[#c69a58]/40 bg-[#0c1c14] shadow-md ${
+      <div className={`relative flex items-center justify-center rounded-xl overflow-hidden border border-[#d5a55d]/40 bg-[#0e1f16] shadow-md ${
         size === 'sm' ? 'w-8 h-8 text-sm' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-base'
       } ${className}`}>
         <img
@@ -30,7 +30,7 @@ export const MirvaiLogo: React.FC<MirvaiLogoProps> = ({
   if (variant === 'badge') {
     return (
       <div className={`inline-flex items-center gap-2.5 ${className}`}>
-        <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#c69a58]/40 bg-[#0a1711] shadow-inner shrink-0">
+        <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#d5a55d]/40 bg-[#08170f] shadow-inner shrink-0">
           <img
             src="/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg"
             alt="Mirvai Crest"
@@ -38,11 +38,11 @@ export const MirvaiLogo: React.FC<MirvaiLogoProps> = ({
           />
         </div>
         <div className="flex flex-col">
-          <span className="font-brand text-sm tracking-[0.22em] text-[#f2e6d0] font-bold uppercase leading-none">
+          <span className="font-brand text-sm tracking-[0.22em] text-[#f0eee8] font-bold uppercase leading-none">
             Mirvai
           </span>
           {showTagline && (
-            <span className="text-[9px] tracking-[0.25em] text-[#c69a58] font-medium uppercase mt-1">
+            <span className="text-[9px] tracking-[0.25em] text-[#d5a55d] font-medium uppercase mt-1">
               Find · Grow · Invest
             </span>
           )}
@@ -54,7 +54,7 @@ export const MirvaiLogo: React.FC<MirvaiLogoProps> = ({
   // Full variant (Hero or Splash)
   return (
     <div className={`flex flex-col items-center text-center ${className}`}>
-      <div className={`relative rounded-2xl overflow-hidden border border-[#c69a58]/40 shadow-2xl bg-[#07130e] mb-3 ${
+      <div className={`relative rounded-2xl overflow-hidden border border-[#d5a55d]/40 shadow-2xl bg-[#06130b] mb-3 ${
         size === 'hero' ? 'w-28 h-28' : size === 'lg' ? 'w-20 h-20' : 'w-14 h-14'
       }`}>
         <img

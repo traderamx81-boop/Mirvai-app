@@ -7,6 +7,23 @@ export type PropertyCategory =
   | 'Off-plan'
   | 'Commercial';
 
+export type DivisionId =
+  | 'realty'
+  | 'developments'
+  | 'construction'
+  | 'technology'
+  | 'energy'
+  | 'communities';
+
+export interface MaterialItem {
+  id: string;
+  name: string;
+  category: string;
+  spec: string;
+  unit: string;
+  estPrice: string;
+}
+
 export interface Property {
   id: string;
   category: PropertyCategory;

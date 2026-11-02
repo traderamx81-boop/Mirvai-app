@@ -1,0 +1,53 @@
+{
+  "backup_created_at": "2026-09-18T17:00:00Z",
+  "title": "Mirvai",
+  "description": "Premium real estate sourcing and advisory for Nigerians at home and abroad.",
+  "slug": "mirvai-properties",
+  "status": "active",
+  "live_url": "https://mirvaigroup.com",
+  "project_id": "appgprj_6a97fdb8fda08191a422badce2188dae",
+  "access_mode": "public",
+  "owner_email": "stevenraechelle@gmail.com",
+  "latest_version_number": 23,
+  "latest_commit_sha": "cff7a955946bd41153f6f7906532c4a69614007e",
+  "custom_domains": [
+    {
+      "hostname": "mirvaigroup.com",
+      "status": "active",
+      "ssl_status": "active",
+      "provider_status": "active",
+      "cname_target": "custom-domains.chatgpt.site.",
+      "apex_proxy_ipv4_targets": [
+        "162.159.143.30",
+        "172.66.3.26"
+      ],
+      "validation_records": [
+        {
+          "record_type": "TXT",
+          "name": "_openai-site-verification.mirvaigroup.com",
+          "value": "openai-site-verification=F2h4_UdXugJ6n5ErJqxqrnMGaHqtoE6ZxKy_xa54YtY"
+        }
+      ],
+      "last_error": null
+    },
+    {
+      "hostname": "www.mirvaigroup.com",
+      "status": "active",
+      "ssl_status": "active",
+      "provider_status": "active",
+      "cname_target": "custom-domains.chatgpt.site.",
+      "apex_proxy_ipv4_targets": [
+        "162.159.143.30",
+        "172.66.3.26"
+      ],
+      "validation_records": [
+        {
+          "record_type": "TXT",
+          "name": "_openai-site-verification.www.mirvaigroup.com",
+          "value": "openai-site-verification=HZS4uJQX_V-vsbbl2jNm4uQrNc6lbzqaco-1W9CM1sc"
+        }
+      ],
+      "last_error": null
+    }
+  ]
+}

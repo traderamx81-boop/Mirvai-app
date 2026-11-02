@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ShieldCheck, MapPin, CheckCircle2, Bookmark, Video, FileText, Share2, Compass, Layers } from 'lucide-react';
+import { X, ShieldCheck, MapPin, CheckCircle2, Bookmark, Heart, Video, FileText, Share2, Compass, Layers } from 'lucide-react';
 import { Property } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { MirvaiLogo } from './MirvaiLogo';
@@ -19,34 +19,66 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 }) => {
   const { isPropertySaved, toggleSaveProperty } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'title' | 'diaspora'>('overview');
+  const [isPulsing, setIsPulsing] = useState(false);
+  const [showSavedFeedback, setShowSavedFeedback] = useState(false);
 
   if (!property) return null;
 
   const saved = isPropertySaved(property.id);
 
+  const handleToggleSave = () => {
+    const willBeSaved = !saved;
+    toggleSaveProperty(property.id);
+    if (willBeSaved) {
+      setIsPulsing(true);
+      setShowSavedFeedback(true);
+      setTimeout(() => {
+        setIsPulsing(false);
+      }, 500);
+      setTimeout(() => {
+        setShowSavedFeedback(false);
+      }, 2400);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-[#0b1b13] border border-[#1f4230] rounded-t-[32px] sm:rounded-3xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+      <div className="w-full max-w-lg bg-[#0e1f16] border border-[#183324] rounded-t-[32px] sm:rounded-3xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
         {/* Header Bar */}
-        <div className="p-4 border-b border-[#183626] flex items-center justify-between bg-[#08150f]">
+        <div className="p-4 border-b border-[#183324] flex items-center justify-between bg-[#08170f]">
           <div className="flex items-center gap-2">
             <MirvaiLogo variant="badge" showTagline={false} size="sm" />
             <span className="text-xs text-[#82998b] font-medium">Verified Property Details</span>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => toggleSaveProperty(property.id)}
-              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
-                saved
-                  ? 'bg-[#cca25d] border-[#cca25d] text-[#0a1711]'
-                  : 'bg-[#0e2117] border-[#1d3d2c] text-[#8fa397]'
-              }`}
-            >
-              <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
-            </button>
+          <div className="flex items-center gap-2.5">
+            {/* Save Heart / Bookmark button with subtle pulse animation */}
+            <div className="relative flex items-center">
+              {showSavedFeedback && (
+                <span className="absolute right-11 whitespace-nowrap px-2.5 py-1 rounded-full bg-[#14291e] border border-[#d5a55d]/50 text-[10px] text-[#d5a55d] font-semibold animate-in fade-in slide-in-from-right-2 duration-200 pointer-events-none shadow-lg z-20">
+                  Saved to private list
+                </span>
+              )}
+              <button
+                onClick={handleToggleSave}
+                title={saved ? 'Remove from saved' : 'Save to your list'}
+                aria-label={saved ? 'Remove from saved' : 'Save to your list'}
+                className={`w-9 h-9 rounded-full border flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                  saved
+                    ? 'bg-[#d5a55d] border-[#d5a55d] text-[#101f16] shadow-md shadow-[#d5a55d]/20'
+                    : 'bg-[#0e1f16] border-[#183324] text-[#82998c] hover:text-[#d5a55d] hover:border-[#d5a55d]/40'
+                } ${isPulsing ? 'animate-save-pulse' : ''}`}
+              >
+                <Heart
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    saved ? 'fill-[#101f16] stroke-[#101f16]' : 'stroke-current'
+                  } ${isPulsing ? 'scale-125' : 'scale-100'}`}
+                />
+              </button>
+            </div>
+
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-[#0e2117] border border-[#1d3d2c] flex items-center justify-center text-[#8fa397] hover:text-[#e4be78]"
+              className="w-9 h-9 rounded-full bg-[#0e1f16] border border-[#183324] flex items-center justify-center text-[#82998c] hover:text-[#d5a55d] cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -56,7 +88,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           {/* Main Visual */}
-          <div className="relative h-56 rounded-2xl overflow-hidden border border-[#1d3d2c] bg-[#07130e]">
+          <div className="relative h-56 rounded-2xl overflow-hidden border border-[#183324] bg-[#08170f]">
             <img
               src={property.imageUrl}
               alt={property.title}
@@ -64,8 +96,9 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#07130e] via-transparent to-transparent" />
             <div className="absolute top-3 left-3 flex gap-2">
-              <span className="px-2.5 py-1 rounded-md bg-[#07130e]/85 backdrop-blur-md border border-[#214733] text-[9px] font-bold tracking-widest uppercase text-[#cad8cf]">
-                SAMPLE LAYOUT &amp; VERIFIED
+              <span className="px-2.5 py-1 rounded-md bg-[#07130e]/85 backdrop-blur-md border border-[#214733] text-[9px] font-bold tracking-widest uppercase text-[#cad8cf] flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-[#d5a55d]" />
+                VERIFIED BY MIRVAI LEGAL
               </span>
               <span className="px-2.5 py-1 rounded-md bg-[#cca25d] text-[#0a1711] text-[9px] font-bold uppercase">
                 {property.categoryLabel}
@@ -87,33 +120,33 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
           </div>
 
           {/* Sub Navigation in Modal */}
-          <div className="flex border-b border-[#183626]">
+          <div className="flex border-b border-[#183324]">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors ${
+              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'overview'
-                  ? 'border-[#cca25d] text-[#dfb877]'
-                  : 'border-transparent text-[#82998b] hover:text-[#dce7e1]'
+                  ? 'border-[#d5a55d] text-[#d5a55d]'
+                  : 'border-transparent text-[#82998c] hover:text-[#f0eee8]'
               }`}
             >
               Overview &amp; Specs
             </button>
             <button
               onClick={() => setActiveTab('title')}
-              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors ${
+              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'title'
-                  ? 'border-[#cca25d] text-[#dfb877]'
-                  : 'border-transparent text-[#82998b] hover:text-[#dce7e1]'
+                  ? 'border-[#d5a55d] text-[#d5a55d]'
+                  : 'border-transparent text-[#82998c] hover:text-[#f0eee8]'
               }`}
             >
               Title Verification
             </button>
             <button
               onClick={() => setActiveTab('diaspora')}
-              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors ${
+              className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'diaspora'
-                  ? 'border-[#cca25d] text-[#dfb877]'
-                  : 'border-transparent text-[#82998b] hover:text-[#dce7e1]'
+                  ? 'border-[#d5a55d] text-[#d5a55d]'
+                  : 'border-transparent text-[#82998c] hover:text-[#f0eee8]'
               }`}
             >
               Diaspora Inspection
@@ -249,13 +282,13 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
         </div>
 
         {/* Action Buttons Footer */}
-        <div className="p-4 bg-[#08150f] border-t border-[#183626] flex gap-2">
+        <div className="p-4 bg-[#08170f] border-t border-[#183324] flex gap-2">
           <button
             onClick={() => {
               onClose();
               onScheduleInspection(property);
             }}
-            className="flex-1 py-3 rounded-xl bg-[#132c1f] hover:bg-[#1a3c2a] border border-[#234b35] text-xs font-semibold text-[#dfb877] flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 py-3 rounded-xl bg-[#0e1f16] hover:bg-[#14291e] border border-[#183324] text-xs font-semibold text-[#d5a55d] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
           >
             <Video className="w-4 h-4" />
             <span>Book Remote Inspection</span>
@@ -265,7 +298,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
               onClose();
               onEnquire(property);
             }}
-            className="flex-1 py-3 rounded-xl bg-[#cca25d] hover:bg-[#d8b06b] text-[#0a1711] text-xs font-bold transition-colors shadow-md"
+            className="flex-1 py-3 rounded-xl bg-[#d5a55d] hover:bg-[#deb26d] text-[#101f16] text-xs font-bold transition-colors shadow-md cursor-pointer"
           >
             Send Property Brief
           </button>

@@ -1,0 +1,8 @@
+type,host,value,ttl,purpose
+A,@,162.159.143.30,Automatic,Current Sites apex routing
+A,@,172.66.3.26,Automatic,Current Sites apex routing
+TXT,_openai-site-verification,openai-site-verification=F2h4_UdXugJ6n5ErJqxqrnMGaHqtoE6ZxKy_xa54YtY,Automatic,Apex ownership verification
+TXT,_cf-custom-hostname,609e7fa9-2d7e-43e9-bdc6-3202e70f4379,Automatic,Apex certificate/custom-host verification
+CNAME,www,custom-domains.chatgpt.site,Automatic,Current www routing
+TXT,_openai-site-verification.www,openai-site-verification=HZS4uJQX_V-vsbbl2jNm4uQrNc6lbzqaco-1W9CM1sc,Automatic,www ownership verification
+TXT,_cf-custom-hostname.www,ec22b1b8-3124-44a8-900b-5fafa7fbcb53,Automatic,www certificate/custom-host verification

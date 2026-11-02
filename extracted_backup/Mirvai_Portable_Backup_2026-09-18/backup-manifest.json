@@ -1,0 +1,27 @@
+{
+  "backup_name": "Mirvai_Portable_Backup_2026-09-18",
+  "created_at": "2026-09-18T17:00:00Z",
+  "live_site": "https://mirvaigroup.com",
+  "source_commit": "cff7a955946bd41153f6f7906532c4a69614007e",
+  "source_version": 23,
+  "crm_record_counts": {
+    "analytics_events": 233,
+    "appointments": 0,
+    "chat_messages": 0,
+    "conversations": 0,
+    "leads": 0,
+    "properties": 0
+  },
+  "includes": [
+    "Exact tracked website source and static assets from live source commit",
+    "CRM table exports in JSON and CSV",
+    "Current domain and DNS routing reference",
+    "Site version history metadata",
+    "Migration and recovery instructions"
+  ],
+  "excludes": [
+    "Passwords, authentication tokens, API keys and other secrets",
+    "Unreferenced/orphaned object-storage uploads",
+    "Third-party account credentials"
+  ]
+}

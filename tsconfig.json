@@ -17,12 +17,18 @@
     "allowJs": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/components/*": ["./website-source/components/*"],
+      "@/lib/*": ["./website-source/lib/*"],
+      "@/app/*": ["./website-source/app/*"],
+      "next": ["./src/shims/next.ts"],
+      "next/image": ["./src/shims/next-image.tsx"],
+      "next/link": ["./src/shims/next-link.tsx"],
+      "next/navigation": ["./src/shims/next-navigation.ts"],
+      "@/*": ["./*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "exclude": ["dist"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "extracted_backup", "node_modules", "website-source"]
 }

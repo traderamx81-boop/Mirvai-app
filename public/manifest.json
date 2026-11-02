@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#07130e",
-  "theme_color": "#07130e",
+  "background_color": "#06130b",
+  "theme_color": "#06130b",
   "icons": [
     {
       "src": "/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg",

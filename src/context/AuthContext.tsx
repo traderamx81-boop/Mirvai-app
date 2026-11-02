@@ -23,18 +23,21 @@ interface AuthContextType {
   clearUserData: () => void;
   authModalOpen: boolean;
   setAuthModalOpen: (open: boolean) => void;
+  authModalMode: 'login' | 'signup';
+  setAuthModalMode: (mode: 'login' | 'signup') => void;
+  openAuthModal: (mode?: 'login' | 'signup') => void;
   privacyModalOpen: boolean;
   setPrivacyModalOpen: (open: boolean) => void;
 }
 
 const DEFAULT_USER: UserProfile = {
   id: 'usr_mirvai_client',
-  name: 'Mirvai Client',
-  email: 'client@mirvai.com',
-  phone: '+234 803 555 0192',
+  name: 'Dr. Adeola Williams',
+  email: 'a.williams@diaspora-uk.co',
+  phone: '+44 7911 123456',
   photoUrl: null,
   role: 'Verified Diaspora Investor',
-  isLoggedIn: true,
+  isLoggedIn: false,
   authMethod: 'guest',
   privacyMode: true,
   biometricLock: false,
@@ -162,7 +165,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [documents] = useState<ClientDocument[]>(DEFAULT_DOCUMENTS);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+
+  const openAuthModal = (mode: 'login' | 'signup' = 'login') => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
 
   useEffect(() => {
     try {
@@ -375,6 +384,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearUserData,
         authModalOpen,
         setAuthModalOpen,
+        authModalMode,
+        setAuthModalMode,
+        openAuthModal,
         privacyModalOpen,
         setPrivacyModalOpen,
       }}
