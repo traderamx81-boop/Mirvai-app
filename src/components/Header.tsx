@@ -8,7 +8,6 @@ interface HeaderProps {
   onBack?: () => void;
   showBack?: boolean;
   onOpenMenu?: () => void;
-  onViewWebsite?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,7 +15,6 @@ export const Header: React.FC<HeaderProps> = ({
   onBack,
   showBack = false,
   onOpenMenu,
-  onViewWebsite,
 }) => {
   const { user, setAuthModalOpen, setPrivacyModalOpen } = useAuth();
   const [notificationsOpen, setNotificationsOpen] = useState(false);

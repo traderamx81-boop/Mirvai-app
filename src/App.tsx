@@ -24,7 +24,9 @@ import { SavedPropertiesModal } from './components/SavedPropertiesModal';
 import { InstallAppBanner } from './components/InstallAppBanner';
 import { MirvaiWebsiteLanding } from './components/MirvaiWebsiteLanding';
 import { MirvaiWebsiteProperties } from './components/MirvaiWebsiteProperties';
+import { MirvaiWebsitePropertyDetail } from './components/MirvaiWebsitePropertyDetail';
 import { MirvaiWebsiteGuides } from './components/MirvaiWebsiteGuides';
+import { MirvaiWebsiteGuideDetail } from './components/MirvaiWebsiteGuideDetail';
 import { MirvaiWebsitePrivacy } from './components/MirvaiWebsitePrivacy';
 import { PROPERTIES } from './data/propertiesData';
 import { Property, PropertyCategory, DivisionId } from './types';
@@ -32,7 +34,8 @@ import { Property, PropertyCategory, DivisionId } from './types';
 const AppContent: React.FC = () => {
   // 'website' is the default landing page of the application as requested
   const [currentMode, setCurrentMode] = useState<'website' | 'app'>('website');
-  const [websiteSubPage, setWebsiteSubPage] = useState<'home' | 'properties' | 'guides' | 'privacy'>('home');
+  const [websiteSubPage, setWebsiteSubPage] = useState<'home' | 'properties' | 'property-detail' | 'guides' | 'guide-detail' | 'privacy'>('home');
+  const [activeSlug, setActiveSlug] = useState<string>('');
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [currentDivision, setCurrentDivision] = useState<DivisionId | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -128,11 +131,18 @@ const AppContent: React.FC = () => {
 
   // Listen for navigation events emitted by website-source Next.js Link shims
   useEffect(() => {
-    const handleNav = (e: Event) => {
-      const customEvent = e as CustomEvent<{ href: string }>;
-      const href = customEvent.detail?.href || '';
+    const handleNav = (e?: Event) => {
+      const customEvent = e as CustomEvent<{ href: string }> | undefined;
+      const href = customEvent?.detail?.href || (typeof window !== 'undefined' ? window.location.pathname + window.location.search + window.location.hash : '');
 
-      if (href.startsWith('/properties')) {
+      if (href.startsWith('/properties/') && !href.startsWith('/properties?')) {
+        const pathPart = href.split('?')[0].split('#')[0];
+        const slug = pathPart.replace('/properties/', '');
+        setCurrentMode('website');
+        setWebsiteSubPage('property-detail');
+        setActiveSlug(slug);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (href === '/properties' || href.startsWith('/properties?') || href.startsWith('/properties#')) {
         setCurrentMode('website');
         setWebsiteSubPage('properties');
         if (href.includes('#browse')) {
@@ -143,7 +153,14 @@ const AppContent: React.FC = () => {
         } else {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      } else if (href.startsWith('/guides')) {
+      } else if (href.startsWith('/guides/') && !href.startsWith('/guides?')) {
+        const pathPart = href.split('?')[0].split('#')[0];
+        const slug = pathPart.replace('/guides/', '');
+        setCurrentMode('website');
+        setWebsiteSubPage('guide-detail');
+        setActiveSlug(slug);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (href === '/guides' || href.startsWith('/guides?') || href.startsWith('/guides#')) {
         setCurrentMode('website');
         setWebsiteSubPage('guides');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -179,7 +196,11 @@ const AppContent: React.FC = () => {
     };
 
     window.addEventListener('mirvai:navigate', handleNav);
-    return () => window.removeEventListener('mirvai:navigate', handleNav);
+    window.addEventListener('popstate', handleNav);
+    return () => {
+      window.removeEventListener('mirvai:navigate', handleNav);
+      window.removeEventListener('popstate', handleNav);
+    };
   }, []);
 
   const selectedProperty = selectedPropertyId
@@ -224,8 +245,6 @@ const AppContent: React.FC = () => {
     setActiveTab(tab);
   };
 
-  const isChatActive = activeTab === 'messages' && currentDivision === null && currentMode === 'app';
-
   return (
     <div className="min-h-screen bg-[#06130b] text-[#e2ede6] flex flex-col items-center justify-start relative w-full overflow-x-hidden selection:bg-[#d5a55d]/30 selection:text-white">
       {/* Background Ambience */}
@@ -244,57 +263,39 @@ const AppContent: React.FC = () => {
           {/* Render website-source pages */}
           {websiteSubPage === 'home' && <MirvaiWebsiteLanding />}
           {websiteSubPage === 'properties' && <MirvaiWebsiteProperties />}
+          {websiteSubPage === 'property-detail' && <MirvaiWebsitePropertyDetail slug={activeSlug} />}
           {websiteSubPage === 'guides' && <MirvaiWebsiteGuides />}
+          {websiteSubPage === 'guide-detail' && <MirvaiWebsiteGuideDetail slug={activeSlug} />}
           {websiteSubPage === 'privacy' && <MirvaiWebsitePrivacy />}
         </div>
       ) : (
         /* Mode 2: MIRVAI CLIENT APP & ECOSYSTEM PORTAL */
         <>
-          {/* When chat is active, it takes over the entire viewport */}
-          {isChatActive ? (
-            <div className="w-full h-[100dvh] flex flex-col justify-between z-30">
-              <MessagesTab
-                onBack={handleBackToHome}
-                onNavigateTab={handleTabChange}
-                onOpenDiasporaModal={() => setDiasporaModalOpen(true)}
-                onOpenBrief={() => {
-                  setCurrentDivision(null);
-                  setActiveTab('enquiry');
-                }}
-              />
+          {/* PWA App Install Banner */}
+          <InstallAppBanner />
+
+          {/* App Header (shown when not inside a division with its own top title) */}
+          {currentDivision === null && (
+            <div className="w-full z-40 bg-[#06130b]/95 backdrop-blur-md">
+              <div className="w-full max-w-7xl mx-auto">
+                <Header
+                  currentTab={activeTab}
+                  showBack={activeTab !== 'home'}
+                  onBack={handleBackToHome}
+                  onOpenMenu={() => setIsMenuOpen(true)}
+                />
+              </div>
             </div>
-          ) : (
-            <>
-              {/* PWA App Install Banner */}
-              <InstallAppBanner />
+          )}
 
-              {/* App Header (shown when not inside a division with its own top title) */}
-              {currentDivision === null && (
-                <div className="w-full z-40 bg-[#06130b]/95 backdrop-blur-md">
-                  <div className="w-full max-w-7xl mx-auto">
-                    <Header
-                      currentTab={activeTab}
-                      showBack={activeTab !== 'home'}
-                      onBack={handleBackToHome}
-                      onOpenMenu={() => setIsMenuOpen(true)}
-                      onViewWebsite={() => {
-                        setCurrentMode('website');
-                        setWebsiteSubPage('home');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Dynamic Main App Body */}
-              <main
-                className={`w-full flex-1 relative z-10 transition-all duration-300 px-3 sm:px-6 md:px-8 py-2 ${
-                  activeTab === 'properties' && currentDivision === null
-                    ? 'max-w-7xl mx-auto'
-                    : 'max-w-3xl mx-auto'
-                }`}
-              >
+          {/* Dynamic Main App Body */}
+          <main
+            className={`w-full flex-1 relative z-10 transition-all duration-300 px-3 sm:px-6 md:px-8 pt-2 pb-28 sm:pb-32 ${
+              (activeTab === 'properties' || activeTab === 'messages' || currentDivision === 'realty')
+                ? 'max-w-7xl mx-auto'
+                : 'max-w-3xl mx-auto'
+            }`}
+          >
                 {/* Division Pages Matching Screenshots */}
                 {currentDivision === 'realty' && (
                   <RealtyDivision
@@ -392,6 +393,18 @@ const AppContent: React.FC = () => {
                       />
                     )}
 
+                    {activeTab === 'messages' && (
+                      <MessagesTab
+                        onBack={handleBackToHome}
+                        onNavigateTab={handleTabChange}
+                        onOpenDiasporaModal={() => setDiasporaModalOpen(true)}
+                        onOpenBrief={() => {
+                          setCurrentDivision(null);
+                          setActiveTab('enquiry');
+                        }}
+                      />
+                    )}
+
                     {activeTab === 'account' && (
                       <AccountTab
                         onBack={handleBackToHome}
@@ -414,23 +427,17 @@ const AppContent: React.FC = () => {
                 activeTab={activeTab}
                 onTabChange={handleTabChange}
               />
+
+              {/* Mirvai Ecosystem Full Drawer Navigation */}
+              <EcosystemMenuDrawer
+                isOpen={isMenuOpen}
+                onClose={() => setIsMenuOpen(false)}
+                onSelectDivision={handleSelectDivision}
+                onGoHome={handleGoToHomeOverview}
+                currentDivision={currentDivision}
+              />
             </>
           )}
-
-          {/* Mirvai Ecosystem Full Drawer Navigation */}
-          <EcosystemMenuDrawer
-            isOpen={isMenuOpen}
-            onClose={() => setIsMenuOpen(false)}
-            onSelectDivision={handleSelectDivision}
-            onGoHome={handleGoToHomeOverview}
-            onOpenWebsite={() => {
-              setCurrentMode('website');
-              setWebsiteSubPage('home');
-            }}
-            currentDivision={currentDivision}
-          />
-        </>
-      )}
 
       {/* Modals & Dialogs (Always accessible across both modes) */}
       <PropertyDetailModal

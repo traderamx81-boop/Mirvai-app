@@ -48,12 +48,12 @@ export const featuredProperty = {
   status: "Available",
   completionStatus: "Fully completed",
   titleDocument: "Governor’s Consent",
-  publiclyListed: false,
+  publiclyListed: true,
   description:
     "A fully completed four-bedroom luxury terrace duplex with a boy’s quarters in Adeniyi Jones, Ikeja. The home combines modern contemporary architecture with generous living spaces, an ante-room, all en-suite bedrooms, a fully fitted kitchen and quality sanitary fittings. It is set within a secure gated environment in an established Ikeja neighbourhood.",
   image_key: null,
   image_url: "/properties/adeniyi-jones-terrace/01-exterior.jpg",
-  verified: 0,
+  verified: 1,
   features: [
     "Modern contemporary architecture",
     "Spacious living area",

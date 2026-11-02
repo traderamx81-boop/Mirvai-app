@@ -217,21 +217,7 @@ export default function PropertyExploreMenu() {
                   </div>
                 </div>
 
-                {/* 2. Home Overview Button */}
-                <Link
-                  href="/"
-                  onClick={close}
-                  className="w-full p-3.5 rounded-2xl bg-[#092015] border border-[#1b3d2b] hover:border-[#d5a55d]/60 flex items-center justify-between text-left transition-all group no-underline"
-                >
-                  <span className="text-sm font-semibold text-[#f0eee8] group-hover:text-[#d5a55d] transition-colors">
-                    Home overview
-                  </span>
-                  <span className="text-[#82998c] group-hover:text-[#d5a55d] group-hover:translate-x-1 transition-all text-sm font-bold">
-                    →
-                  </span>
-                </Link>
-
-                {/* 3. Primary Site Navigation Links */}
+                {/* Primary Site Navigation Links */}
                 <nav className="site-menu-primary" aria-label="Main navigation">
                   <p>Navigation</p>
                   <Link href="/properties" onClick={close}>All Verified Properties</Link>

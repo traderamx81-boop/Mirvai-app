@@ -7,7 +7,6 @@ interface EcosystemMenuDrawerProps {
   onClose: () => void;
   onSelectDivision: (divisionId: DivisionId) => void;
   onGoHome: () => void;
-  onOpenWebsite?: () => void;
   currentDivision?: DivisionId | null;
 }
 
@@ -16,7 +15,6 @@ export const EcosystemMenuDrawer: React.FC<EcosystemMenuDrawerProps> = ({
   onClose,
   onSelectDivision,
   onGoHome,
-  onOpenWebsite,
   currentDivision,
 }) => {
   const [user, setUser] = useState<{ isLoggedIn: boolean; name: string } | null>(null);
@@ -273,7 +271,7 @@ export const EcosystemMenuDrawer: React.FC<EcosystemMenuDrawerProps> = ({
           </div>
 
           {/* Home overview link card matching Screenshot */}
-          <div className="space-y-2">
+          <div>
             <button
               onClick={() => {
                 onGoHome();
@@ -286,24 +284,6 @@ export const EcosystemMenuDrawer: React.FC<EcosystemMenuDrawerProps> = ({
               </span>
               <ArrowRight className="w-4 h-4 text-[#82998c] group-hover:text-[#d5a55d] group-hover:translate-x-1 transition-all" />
             </button>
-
-            {onOpenWebsite && (
-              <button
-                onClick={() => {
-                  onOpenWebsite();
-                  onClose();
-                }}
-                className="w-full p-3.5 rounded-2xl bg-[#12281d] border border-[#d5a55d]/40 hover:border-[#d5a55d] flex items-center justify-between text-left transition-colors cursor-pointer group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Globe className="w-4 h-4 text-[#d5a55d]" />
-                  <span className="text-xs font-semibold text-[#f0eee8] group-hover:text-[#d5a55d] transition-colors">
-                    Official Website Landing Page
-                  </span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-[#d5a55d] group-hover:translate-x-1 transition-all" />
-              </button>
-            )}
           </div>
 
           {/* Section Header: Mirvai Ecosystem ∨ matching Screenshot */}

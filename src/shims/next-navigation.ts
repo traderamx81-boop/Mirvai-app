@@ -67,3 +67,24 @@ export function useRouter() {
     },
   };
 }
+
+export function notFound(): never {
+  throw new Error('NEXT_NOT_FOUND');
+}
+
+export function redirect(url: string): void {
+  try {
+    window.history.pushState(null, '', url);
+  } catch {}
+  window.dispatchEvent(new CustomEvent('mirvai:navigate', { detail: { href: url } }));
+}
+
+export function useParams<T extends Record<string, string> = Record<string, string>>(): T {
+  const path = typeof window !== 'undefined' ? window.location.pathname : '';
+  const parts = path.split('/').filter(Boolean);
+  if (parts.length >= 2) {
+    return { slug: parts[1] } as unknown as T;
+  }
+  return {} as T;
+}
+

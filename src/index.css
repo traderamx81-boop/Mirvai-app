@@ -245,100 +245,186 @@
   color: #e2ede6 !important;
 }
 
-/* Dedicated Professional Buyer Story Cards */
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid,
-.theme-dark .buyer-story-grid {
+/* Dedicated Professional Buyer Story Cards - High Contrast & No Overlap */
+.buyer-story-grid {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 24px !important;
+  gap: 22px !important;
   background: transparent !important;
   border: none !important;
+  margin-top: 48px !important;
+  width: 100% !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid article,
-.theme-dark .buyer-story-grid article {
+@media (max-width: 1024px) {
+  .buyer-story-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .buyer-story-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Light Theme Story Cards */
+.story-card,
+.buyer-story-grid article {
   display: flex !important;
   flex-direction: column !important;
-  background: linear-gradient(165deg, #092418 0%, #061910 100%) !important;
-  border: 1px solid rgba(213, 165, 93, 0.3) !important;
+  justify-content: space-between !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(198, 178, 150, 0.5) !important;
   border-radius: 20px !important;
-  padding: 34px 28px 28px !important;
-  min-height: 380px !important;
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45) !important;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease !important;
+  padding: 28px 24px !important;
+  min-height: 330px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid article:hover,
-.theme-dark .buyer-story-grid article:hover {
-  transform: translateY(-5px) !important;
-  border-color: rgba(213, 165, 93, 0.65) !important;
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.65), 0 0 25px rgba(213, 165, 93, 0.12) !important;
+.story-card:hover,
+.buyer-story-grid article:hover {
+  transform: translateY(-4px) !important;
+  border-color: #d5a55d !important;
+  box-shadow: 0 18px 45px rgba(11, 38, 27, 0.12) !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid article > span,
-.theme-dark .buyer-story-grid article > span {
-  font-family: var(--serif, Georgia, serif) !important;
-  font-size: 48px !important;
-  line-height: 1 !important;
+.story-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 16px !important;
+  width: 100% !important;
+}
+
+.story-stars {
   color: #d5a55d !important;
-  height: 38px !important;
-  display: block !important;
+  font-size: 15px !important;
+  letter-spacing: 2px !important;
+  line-height: 1 !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid blockquote,
-.theme-dark .buyer-story-grid blockquote {
+.story-number {
+  font-family: monospace, var(--serif, Georgia, serif) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #9a783f !important;
+  background: rgba(213, 165, 93, 0.12) !important;
+  border: 1px solid rgba(213, 165, 93, 0.3) !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+}
+
+.story-quote {
   font-family: var(--serif, Georgia, serif) !important;
-  font-size: 16px !important;
-  line-height: 1.72 !important;
-  color: #f0eee8 !important;
-  margin: 18px 0 28px !important;
+  font-size: 15px !important;
+  line-height: 1.75 !important;
+  color: #1a3328 !important;
+  margin: 0 0 24px 0 !important;
   flex-grow: 1 !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid footer,
-.theme-dark .buyer-story-grid footer {
-  margin-top: auto !important;
-  padding-top: 20px !important;
-  border-top: 1px solid rgba(213, 165, 93, 0.2) !important;
+.story-card-footer {
   display: flex !important;
-  align-items: flex-end !important;
-  justify-content: space-between !important;
-  gap: 16px !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid #ebd8bd !important;
+  width: 100% !important;
   background: transparent !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid footer strong,
-.theme-dark .buyer-story-grid footer strong {
-  display: block !important;
+.story-avatar {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: #112e23 !important;
+  color: #d5a55d !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  shrink: 0 !important;
+  border: 1px solid rgba(213, 165, 93, 0.4) !important;
+}
+
+.story-info {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.story-name {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 13.5px !important;
   font-weight: 700 !important;
-  color: #f0eee8 !important;
-  line-height: 1.4 !important;
+  color: #0b261b !important;
+  line-height: 1.3 !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid footer small,
-.theme-dark .buyer-story-grid footer small {
-  display: block !important;
+.story-location {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  font-size: 10.5px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.12em !important;
-  color: #8fa79b !important;
-  margin-top: 5px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #63776f !important;
+  margin-top: 3px !important;
+  line-height: 1.3 !important;
 }
 
-.mirvai-website-container[data-theme="dark"] .buyer-story-grid footer b,
-.theme-dark .buyer-story-grid footer b {
-  font-family: monospace, var(--serif, Georgia, serif) !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
+/* Dark Theme Story Cards Override */
+.mirvai-website-container[data-theme="dark"] .story-card,
+.mirvai-website-container[data-theme="dark"] .buyer-story-grid article,
+.theme-dark .story-card,
+.theme-dark .buyer-story-grid article {
+  background: linear-gradient(165deg, #092418 0%, #061910 100%) !important;
+  border: 1px solid rgba(213, 165, 93, 0.28) !important;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45) !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-card:hover,
+.mirvai-website-container[data-theme="dark"] .buyer-story-grid article:hover,
+.theme-dark .story-card:hover,
+.theme-dark .buyer-story-grid article:hover {
+  border-color: rgba(213, 165, 93, 0.7) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 20px rgba(213, 165, 93, 0.12) !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-quote,
+.theme-dark .story-quote {
+  color: #f2f7f4 !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-card-footer,
+.theme-dark .story-card-footer {
+  border-top: 1px solid rgba(213, 165, 93, 0.2) !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-name,
+.theme-dark .story-name {
+  color: #f0eee8 !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-location,
+.theme-dark .story-location {
+  color: #9cb2a6 !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-number,
+.theme-dark .story-number {
   color: #d5a55d !important;
   background: rgba(213, 165, 93, 0.15) !important;
   border: 1px solid rgba(213, 165, 93, 0.35) !important;
-  padding: 3px 8px !important;
-  border-radius: 6px !important;
+}
+
+.mirvai-website-container[data-theme="dark"] .story-avatar,
+.theme-dark .story-avatar {
+  background: #133324 !important;
+  border-color: rgba(213, 165, 93, 0.5) !important;
+  color: #d5a55d !important;
 }
 
 .mirvai-website-container[data-theme="dark"] .buyer-story-grid footer small,

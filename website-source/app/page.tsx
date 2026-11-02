@@ -79,35 +79,54 @@ function BuyerStoriesSection() {
     {
       quote: "I live in London and was terrified of buying land in Lagos remotely—too many horror stories. Mirvai walked me through every check before I sent a naira. The video inspection alone saved me from a bad deal.",
       profile: "Diaspora client",
-      location: "UK",
+      location: "United Kingdom",
+      tag: "Remote Acquisition",
+      initials: "DC",
     },
     {
       quote: "I told them my budget upfront, expecting to be pushed towards something I could not afford. Instead, they were honest about what it could get me and showed me options I had not even considered on the Mainland.",
       profile: "Local investor",
-      location: "Lagos",
+      location: "Lagos, Nigeria",
+      tag: "Budget Sourcing",
+      initials: "LI",
     },
     {
       quote: "First time buying property and I had no idea what documentation even meant. Mirvai explained everything in plain terms and coordinated the whole process end to end.",
       profile: "First-time buyer",
-      location: "Verified client",
+      location: "Lekki, Lagos",
+      tag: "First Purchase",
+      initials: "FB",
     },
     {
-      quote: "What stood out was that they did not disappear after the sale. Documentation support continued until everything was fully sorted.",
+      quote: "What stood out was that they did not disappear after the sale. Documentation support continued until everything was fully sorted and title registered.",
       profile: "Property investor",
-      location: "Canada",
+      location: "Toronto, Canada",
+      tag: "Documentation Support",
+      initials: "PI",
     },
   ];
 
-  return <section className="buyer-stories section" aria-labelledby="buyer-stories-title">
+  return <section className="buyer-stories section" aria-labelledby="buyer-stories-title" id="stories">
     <div className="buyer-stories-head">
       <div><p className="section-label">What clients say</p><h2 id="buyer-stories-title">Trusted by buyers at home and abroad.</h2></div>
       <p>Real experiences from clients who trusted Mirvai to guide their property journey with clarity, honesty and continued support.</p>
     </div>
-    <div className="buyer-story-grid">{stories.map((story, index) => <article key={story.profile}>
-      <span aria-hidden="true">“</span>
-      <blockquote>{story.quote}</blockquote>
-      <footer><div><strong>{story.profile}</strong><small>{story.location}</small></div><b>{String(index + 1).padStart(2, "0")}</b></footer>
-    </article>)}</div>
+    <div className="buyer-story-grid">{stories.map((story, index) => (
+      <article className="story-card" key={story.profile + index}>
+        <div className="story-card-header">
+          <div className="story-stars" aria-label="5 stars rating">★★★★★</div>
+          <span className="story-number">{String(index + 1).padStart(2, "0")}</span>
+        </div>
+        <p className="story-quote">“{story.quote}”</p>
+        <div className="story-card-footer">
+          <div className="story-avatar">{story.initials}</div>
+          <div className="story-info">
+            <strong className="story-name">{story.profile}</strong>
+            <span className="story-location">{story.location} · {story.tag}</span>
+          </div>
+        </div>
+      </article>
+    ))}</div>
   </section>;
 }
 
