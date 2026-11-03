@@ -1,51 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { Header } from './components/Header';
-import { BottomNav, TabType } from './components/BottomNav';
-import { HomeTab } from './components/HomeTab';
-import { PropertiesTab } from './components/PropertiesTab';
-import { EnquiryTab } from './components/EnquiryTab';
-import { MessagesTab } from './components/MessagesTab';
-import { AccountTab } from './components/AccountTab';
-import { EcosystemMenuDrawer } from './components/EcosystemMenuDrawer';
-import { RealtyDivision } from './components/divisions/RealtyDivision';
-import { DevelopmentsDivision } from './components/divisions/DevelopmentsDivision';
-import { ConstructionDivision } from './components/divisions/ConstructionDivision';
-import { TechnologyDivision } from './components/divisions/TechnologyDivision';
-import { EnergyDivision } from './components/divisions/EnergyDivision';
-import { CommunitiesDivision } from './components/divisions/CommunitiesDivision';
-import { PropertyDetailModal } from './components/PropertyDetailModal';
-import { AuthModal } from './components/AuthModal';
-import { PrivacyCenterModal } from './components/PrivacyCenterModal';
-import { DiasporaDeskModal } from './components/DiasporaDeskModal';
-import { DocumentVaultModal } from './components/DocumentVaultModal';
-import { AppointmentsModal } from './components/AppointmentsModal';
-import { SavedPropertiesModal } from './components/SavedPropertiesModal';
-import { InstallAppBanner } from './components/InstallAppBanner';
 import { MirvaiWebsiteLanding } from './components/MirvaiWebsiteLanding';
 import { MirvaiWebsiteProperties } from './components/MirvaiWebsiteProperties';
 import { MirvaiWebsitePropertyDetail } from './components/MirvaiWebsitePropertyDetail';
 import { MirvaiWebsiteGuides } from './components/MirvaiWebsiteGuides';
 import { MirvaiWebsiteGuideDetail } from './components/MirvaiWebsiteGuideDetail';
 import { MirvaiWebsitePrivacy } from './components/MirvaiWebsitePrivacy';
-import { PROPERTIES } from './data/propertiesData';
-import { Property, PropertyCategory, DivisionId } from './types';
 
-const AppContent: React.FC = () => {
-  // 'website' is the default landing page of the application as requested
-  const [currentMode, setCurrentMode] = useState<'website' | 'app'>('website');
-  const [websiteSubPage, setWebsiteSubPage] = useState<'home' | 'properties' | 'property-detail' | 'guides' | 'guide-detail' | 'privacy'>('home');
+type WebsiteSubPage = 'home' | 'properties' | 'property-detail' | 'guides' | 'guide-detail' | 'privacy';
+
+export default function App() {
+  const [websiteSubPage, setWebsiteSubPage] = useState<WebsiteSubPage>('home');
   const [activeSlug, setActiveSlug] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<TabType>('home');
-  const [currentDivision, setCurrentDivision] = useState<DivisionId | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [selectedCategoryForProperties, setSelectedCategoryForProperties] = useState<PropertyCategory>('All');
-  const [diasporaModalOpen, setDiasporaModalOpen] = useState(false);
-  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
-  const [appointmentsModalOpen, setAppointmentsModalOpen] = useState(false);
-  const [savedModalOpen, setSavedModalOpen] = useState(false);
-  const [preselectedTypeForEnquiry, setPreselectedTypeForEnquiry] = useState<string>('Terrace duplex');
 
   // Automatic system theme detection with user manual toggle support
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -63,7 +28,6 @@ const AppContent: React.FC = () => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleThemeChange = (e: MediaQueryListEvent) => {
-      // If user hasn't explicitly set a preference, follow system
       try {
         if (!localStorage.getItem('mirvai_theme_preference')) {
           setTheme(e.matches ? 'dark' : 'light');
@@ -76,28 +40,8 @@ const AppContent: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handleThemeChange);
   }, []);
 
-  const {
-    user,
-    authModalOpen,
-    setAuthModalOpen,
-    openAuthModal,
-    logout,
-    privacyModalOpen,
-    setPrivacyModalOpen,
-  } = useAuth();
-
-  // Listen for auth, portal, and theme events dispatched from menu
+  // Listen for theme toggle events
   useEffect(() => {
-    const handleAuthEvent = (e: Event) => {
-      const custom = e as CustomEvent<{ mode: 'login' | 'signup' }>;
-      openAuthModal(custom.detail?.mode || 'login');
-    };
-
-    const handleOpenPortal = () => {
-      setCurrentMode('app');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
     const handleThemeToggle = () => {
       setTheme(prev => {
         const next = prev === 'dark' ? 'light' : 'dark';
@@ -108,26 +52,11 @@ const AppContent: React.FC = () => {
       });
     };
 
-    const handleOpenDivision = (e: Event) => {
-      const custom = e as CustomEvent<{ division: DivisionId }>;
-      if (custom.detail?.division) {
-        setCurrentMode('app');
-        setCurrentDivision(custom.detail.division);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    };
-
-    window.addEventListener('mirvai:auth', handleAuthEvent);
-    window.addEventListener('mirvai:open-portal', handleOpenPortal);
     window.addEventListener('mirvai:theme-toggle', handleThemeToggle);
-    window.addEventListener('mirvai:open-division', handleOpenDivision);
     return () => {
-      window.removeEventListener('mirvai:auth', handleAuthEvent);
-      window.removeEventListener('mirvai:open-portal', handleOpenPortal);
       window.removeEventListener('mirvai:theme-toggle', handleThemeToggle);
-      window.removeEventListener('mirvai:open-division', handleOpenDivision);
     };
-  }, [openAuthModal]);
+  }, []);
 
   // Listen for navigation events emitted by website-source Next.js Link shims
   useEffect(() => {
@@ -138,12 +67,10 @@ const AppContent: React.FC = () => {
       if (href.startsWith('/properties/') && !href.startsWith('/properties?')) {
         const pathPart = href.split('?')[0].split('#')[0];
         const slug = pathPart.replace('/properties/', '');
-        setCurrentMode('website');
         setWebsiteSubPage('property-detail');
         setActiveSlug(slug);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (href === '/properties' || href.startsWith('/properties?') || href.startsWith('/properties#')) {
-        setCurrentMode('website');
         setWebsiteSubPage('properties');
         if (href.includes('#browse')) {
           setTimeout(() => {
@@ -156,24 +83,17 @@ const AppContent: React.FC = () => {
       } else if (href.startsWith('/guides/') && !href.startsWith('/guides?')) {
         const pathPart = href.split('?')[0].split('#')[0];
         const slug = pathPart.replace('/guides/', '');
-        setCurrentMode('website');
         setWebsiteSubPage('guide-detail');
         setActiveSlug(slug);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (href === '/guides' || href.startsWith('/guides?') || href.startsWith('/guides#')) {
-        setCurrentMode('website');
         setWebsiteSubPage('guides');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else if (href.startsWith('/privacy')) {
-        setCurrentMode('website');
         setWebsiteSubPage('privacy');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (href === '/app') {
-        setCurrentMode('app');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         // Home page or home section anchor (/ , /#about, /#services, /#faq, /#enquire, #about, etc.)
-        setCurrentMode('website');
         setWebsiteSubPage('home');
 
         const hashIndex = href.indexOf('#');
@@ -203,48 +123,6 @@ const AppContent: React.FC = () => {
     };
   }, []);
 
-  const selectedProperty = selectedPropertyId
-    ? PROPERTIES.find(p => p.id === selectedPropertyId) || null
-    : null;
-
-  const handleSelectProperty = (propertyId: string) => {
-    setSelectedPropertyId(propertyId);
-  };
-
-  const handleEnquireFromProperty = (property: Property) => {
-    setSelectedPropertyId(null);
-    setCurrentDivision(null);
-    setPreselectedTypeForEnquiry(property.categoryLabel);
-    setActiveTab('enquiry');
-  };
-
-  const handleScheduleInspectionFromProperty = (property: Property) => {
-    setSelectedPropertyId(null);
-    setAppointmentsModalOpen(true);
-  };
-
-  const handleBackToHome = () => {
-    setCurrentDivision(null);
-    setActiveTab('home');
-  };
-
-  const handleGoToHomeOverview = () => {
-    setCurrentDivision(null);
-    setCurrentMode('website');
-    setWebsiteSubPage('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleSelectDivision = (divisionId: DivisionId) => {
-    setCurrentDivision(divisionId);
-    setIsMenuOpen(false);
-  };
-
-  const handleTabChange = (tab: TabType) => {
-    setCurrentDivision(null);
-    setActiveTab(tab);
-  };
-
   return (
     <div className="min-h-screen bg-[#06130b] text-[#e2ede6] flex flex-col items-center justify-start relative w-full overflow-x-hidden selection:bg-[#d5a55d]/30 selection:text-white">
       {/* Background Ambience */}
@@ -253,255 +131,18 @@ const AppContent: React.FC = () => {
         <div className="absolute bottom-[-5%] right-[10%] w-[500px] h-[500px] rounded-full bg-[#d5a55d]/5 blur-[160px]" />
       </div>
 
-      {/* Mode 1: OFFICIAL WEBSITE SOURCE LANDING PAGE */}
-      {currentMode === 'website' ? (
-        <div
-          className={`w-full mirvai-website-container ${theme === 'dark' ? 'theme-dark' : 'theme-light'} relative z-10 transition-colors duration-300`}
-          data-theme={theme}
-        >
-
-          {/* Render website-source pages */}
-          {websiteSubPage === 'home' && <MirvaiWebsiteLanding />}
-          {websiteSubPage === 'properties' && <MirvaiWebsiteProperties />}
-          {websiteSubPage === 'property-detail' && <MirvaiWebsitePropertyDetail slug={activeSlug} />}
-          {websiteSubPage === 'guides' && <MirvaiWebsiteGuides />}
-          {websiteSubPage === 'guide-detail' && <MirvaiWebsiteGuideDetail slug={activeSlug} />}
-          {websiteSubPage === 'privacy' && <MirvaiWebsitePrivacy />}
-        </div>
-      ) : (
-        /* Mode 2: MIRVAI CLIENT APP & ECOSYSTEM PORTAL */
-        <>
-          {/* PWA App Install Banner */}
-          <InstallAppBanner />
-
-          {/* App Header (shown when not inside a division with its own top title) */}
-          {currentDivision === null && (
-            <div className="w-full z-40 bg-[#06130b]/95 backdrop-blur-md">
-              <div className="w-full max-w-7xl mx-auto">
-                <Header
-                  currentTab={activeTab}
-                  showBack={activeTab !== 'home'}
-                  onBack={handleBackToHome}
-                  onOpenMenu={() => setIsMenuOpen(true)}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Dynamic Main App Body */}
-          <main
-            className={`w-full flex-1 relative z-10 transition-all duration-300 px-3 sm:px-6 md:px-8 pt-2 pb-28 sm:pb-32 ${
-              (activeTab === 'properties' || activeTab === 'messages' || currentDivision === 'realty')
-                ? 'max-w-7xl mx-auto'
-                : 'max-w-3xl mx-auto'
-            }`}
-          >
-                {/* Division Pages Matching Screenshots */}
-                {currentDivision === 'realty' && (
-                  <RealtyDivision
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onExploreProperties={cat => {
-                      setSelectedCategoryForProperties(cat || 'All');
-                      setCurrentDivision(null);
-                      setActiveTab('properties');
-                    }}
-                    onOpenEnquiry={catLabel => {
-                      setPreselectedTypeForEnquiry(catLabel);
-                      setCurrentDivision(null);
-                      setActiveTab('enquiry');
-                    }}
-                  />
-                )}
-
-                {currentDivision === 'developments' && (
-                  <DevelopmentsDivision
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onOpenEnquiry={catLabel => {
-                      setPreselectedTypeForEnquiry(catLabel);
-                      setCurrentDivision(null);
-                      setActiveTab('enquiry');
-                    }}
-                  />
-                )}
-
-                {currentDivision === 'construction' && (
-                  <ConstructionDivision
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onOpenMessages={() => {
-                      setCurrentDivision(null);
-                      setActiveTab('messages');
-                    }}
-                  />
-                )}
-
-                {currentDivision === 'technology' && (
-                  <TechnologyDivision
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onOpenPrivacyCenter={() => setPrivacyModalOpen(true)}
-                  />
-                )}
-
-                {currentDivision === 'energy' && (
-                  <EnergyDivision
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onOpenEnquiry={catLabel => {
-                      setPreselectedTypeForEnquiry(catLabel);
-                      setCurrentDivision(null);
-                      setActiveTab('enquiry');
-                    }}
-                  />
-                )}
-
-                {currentDivision === 'communities' && (
-                  <CommunitiesDivision
-                    onOpenMenu={() => setIsMenuOpen(true)}
-                    onOpenEnquiry={catLabel => {
-                      setPreselectedTypeForEnquiry(catLabel);
-                      setCurrentDivision(null);
-                      setActiveTab('enquiry');
-                    }}
-                  />
-                )}
-
-                {/* Standard Tab Navigation when no division is pinned */}
-                {currentDivision === null && (
-                  <>
-                    {activeTab === 'home' && (
-                      <HomeTab
-                        onNavigateTab={(tab, cat) => {
-                          if (cat) setSelectedCategoryForProperties(cat);
-                          setActiveTab(tab);
-                        }}
-                        onSelectProperty={handleSelectProperty}
-                        onOpenDiasporaModal={() => setDiasporaModalOpen(true)}
-                      />
-                    )}
-
-                    {activeTab === 'properties' && (
-                      <PropertiesTab
-                        onBack={handleBackToHome}
-                        onOpenMenu={() => setIsMenuOpen(true)}
-                        onSelectProperty={handleSelectProperty}
-                        initialCategory={selectedCategoryForProperties}
-                      />
-                    )}
-
-                    {activeTab === 'enquiry' && (
-                      <EnquiryTab
-                        onBack={handleBackToHome}
-                        preselectedPropertyType={preselectedTypeForEnquiry}
-                      />
-                    )}
-
-                    {activeTab === 'messages' && (
-                      <MessagesTab
-                        onBack={handleBackToHome}
-                        onNavigateTab={handleTabChange}
-                        onOpenDiasporaModal={() => setDiasporaModalOpen(true)}
-                        onOpenBrief={() => {
-                          setCurrentDivision(null);
-                          setActiveTab('enquiry');
-                        }}
-                      />
-                    )}
-
-                    {activeTab === 'account' && (
-                      <AccountTab
-                        onBack={handleBackToHome}
-                        onNavigateTab={handleTabChange}
-                        onOpenDocuments={() => setDocumentsModalOpen(true)}
-                        onOpenAppointments={() => setAppointmentsModalOpen(true)}
-                        onOpenSaved={() => setSavedModalOpen(true)}
-                        onOpenEnquiries={() => {
-                          setCurrentDivision(null);
-                          setActiveTab('enquiry');
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </main>
-
-              {/* Modern App Bottom Navigation Bar */}
-              <BottomNav
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
-              />
-
-              {/* Mirvai Ecosystem Full Drawer Navigation */}
-              <EcosystemMenuDrawer
-                isOpen={isMenuOpen}
-                onClose={() => setIsMenuOpen(false)}
-                onSelectDivision={handleSelectDivision}
-                onGoHome={handleGoToHomeOverview}
-                currentDivision={currentDivision}
-              />
-            </>
-          )}
-
-      {/* Modals & Dialogs (Always accessible across both modes) */}
-      <PropertyDetailModal
-        property={selectedProperty}
-        onClose={() => setSelectedPropertyId(null)}
-        onEnquire={handleEnquireFromProperty}
-        onScheduleInspection={handleScheduleInspectionFromProperty}
-      />
-
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        onSuccess={() => {
-          setCurrentMode('app');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
-
-      <PrivacyCenterModal
-        isOpen={privacyModalOpen}
-        onClose={() => setPrivacyModalOpen(false)}
-      />
-
-      <DiasporaDeskModal
-        isOpen={diasporaModalOpen}
-        onClose={() => setDiasporaModalOpen(false)}
-        onStartChat={() => {
-          setDiasporaModalOpen(false);
-          setCurrentMode('app');
-          setCurrentDivision(null);
-          setActiveTab('messages');
-        }}
-        onOpenBrief={() => {
-          setDiasporaModalOpen(false);
-          setCurrentMode('app');
-          setCurrentDivision(null);
-          setActiveTab('enquiry');
-        }}
-      />
-
-      <DocumentVaultModal
-        isOpen={documentsModalOpen}
-        onClose={() => setDocumentsModalOpen(false)}
-      />
-
-      <AppointmentsModal
-        isOpen={appointmentsModalOpen}
-        onClose={() => setAppointmentsModalOpen(false)}
-        preselectedPropertyTitle={selectedProperty?.title}
-      />
-
-      <SavedPropertiesModal
-        isOpen={savedModalOpen}
-        onClose={() => setSavedModalOpen(false)}
-        onSelectProperty={handleSelectProperty}
-      />
+      {/* OFFICIAL MIRVAI WEBSITE */}
+      <div
+        className={`w-full mirvai-website-container ${theme === 'dark' ? 'theme-dark' : 'theme-light'} relative z-10 transition-colors duration-300`}
+        data-theme={theme}
+      >
+        {websiteSubPage === 'home' && <MirvaiWebsiteLanding />}
+        {websiteSubPage === 'properties' && <MirvaiWebsiteProperties />}
+        {websiteSubPage === 'property-detail' && <MirvaiWebsitePropertyDetail slug={activeSlug} />}
+        {websiteSubPage === 'guides' && <MirvaiWebsiteGuides />}
+        {websiteSubPage === 'guide-detail' && <MirvaiWebsiteGuideDetail slug={activeSlug} />}
+        {websiteSubPage === 'privacy' && <MirvaiWebsitePrivacy />}
+      </div>
     </div>
-  );
-};
-
-export default function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
   );
 }

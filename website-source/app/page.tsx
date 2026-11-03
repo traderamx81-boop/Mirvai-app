@@ -34,8 +34,8 @@ export default function Home() {
   return <main>
     <header className="nav-shell editorial-nav">
       <MirvaiBrand href="#top" />
-      <div className="site-header-actions">
-        <a className="nav-cta" onClick={() => trackEvent("whatsapp_click")} href={`https://wa.me/${WA}`}>WhatsApp us</a>
+      <div className="site-header-actions flex items-center gap-3">
+        <a className="nav-cta hidden sm:inline-flex items-center" onClick={() => trackEvent("whatsapp_click")} href={`https://wa.me/${WA}`}>WhatsApp us</a>
         <PropertyExploreMenu/>
       </div>
     </header>
@@ -48,25 +48,19 @@ export default function Home() {
         <div className="hero-kicker"><p className="eyebrow">Lagos · Nigeria · Diaspora</p><span>Buy · Sell · Invest</span></div>
         <h1>Property decisions,<br /><em>made with confidence.</em></h1>
         <p className="hero-copy">We help you find, evaluate and secure the right property in Lagos—wherever you are in the world.</p>
-        <div className="hero-actions"><a className="button gold editorial-button" href="#properties">Explore properties <span aria-hidden="true">↗</span></a><a className="text-link" href="#enquire">Tell us what you need</a></div>
+        <div className="hero-actions">
+          <a className="button gold editorial-button" href="#properties">Explore properties <span aria-hidden="true">↗</span></a>
+          <a className="text-link" href="#enquire">Tell us what you need</a>
+        </div>
         <div className="trust-line"><span>Verified options</span><span>Clear guidance</span><span>End-to-end support</span></div>
       </div>
       <div className="hero-index" aria-hidden="true"><span>01</span><i/><small>Mirvai<br/>Lagos</small></div>
     </section>
 
     <PropertyGrid />
-    <TrustProofSection />
-
-    <section className="overview section" id="services">
-      <div className="overview-head"><div><p className="section-label">Find. Own. Grow.</p><h2>Everything you need to move with confidence.</h2></div><p>Mirvai helps buyers and investors source carefully selected property across Lagos Mainland and Island, with honest guidance from the first conversation to completion.</p></div>
-      <div className="service-chips">{services.map(service => <span key={service}>{service}</span>)}</div>
-      <div className="value-grid"><article><b>01</b><h3>Verification first</h3><p>We prioritise genuine opportunities and coordinate the right professional checks.</p></article><article><b>02</b><h3>Honest budget guidance</h3><p>If there is no exact match, we explain what your budget can achieve and show the closest suitable options.</p></article><article><b>03</b><h3>Mainland and Island</h3><p>We source residential, land and investment opportunities across both sides of Lagos.</p></article><article><b>04</b><h3>End-to-end support</h3><p>From search and inspection to documentation coordination and after-sales guidance.</p></article></div>
-      <div className="process-strip" id="process"><article><b>1</b><span><strong>Tell us what you need</strong>Location, property type, budget and timeline.</span></article><article><b>2</b><span><strong>Review suitable options</strong>We share carefully sourced matches.</span></article><article><b>3</b><span><strong>Inspect and decide</strong>We guide the important next steps.</span></article></div>
-    </section>
-
     <BuyerStoriesSection />
-    <BuyerGuidesSection />
-    <DiasporaFaqSection />
+    <TrustProofSection />
+    <CompactAppDownloadStrip />
     <ClientActionSection />
 
     <footer><MirvaiBrand/><p>Integrity. Professionalism. Results.</p><p>© 2026 Mirvai · <Link href="/guides">Buyer guides</Link> · <Link href="/privacy">Privacy</Link></p></footer>
@@ -138,11 +132,62 @@ function TrustProofSection() {
     ["04", "Coordinate specialist review", "A qualified Nigerian property lawyer reviews legal and title questions; a registered surveyor checks survey or boundary issues; and a building professional can assess physical condition when needed."],
     ["05", "Share findings before a decision", "We organise the feedback, flag open questions and help you understand the next step before commitment."],
   ];
-  return <section className="trust-proof section" id="about"><div className="trust-identity"><p className="section-label">Who’s behind Mirvai</p><h2>Built on trust, not shortcuts.</h2><p>Buying property in Lagos should not mean guessing who to trust. After seeing how unclear information and distance make it difficult for buyers—especially Nigerians abroad—to find properties that match their needs and budgets, Osuwah Nkechi Racheal founded Mirvai to offer a clearer path through carefully sourced options, honest guidance and transparent communication.</p><div className="founder-card"><div><small>Founder</small><h3>Osuwah Nkechi Racheal</h3><p>Founder &amp; Chief Executive Officer</p></div></div><p className="founder-copy">Her vision is to bring a different, buyer-first approach to Nigeria’s real-estate market—one that helps clients understand the opportunity, the checks still required and what their budget can realistically achieve before they commit. Mirvai’s support continues through documentation coordination and after-sales guidance.</p></div><div className="trust-process"><p className="section-label">The Mirvai due-diligence journey</p>{steps.map(([number, title, copy]) => <article key={number}><b>{number}</b><div><h3>{title}</h3><p>{copy}</p></div></article>)}<div className="role-note"><strong>Clear responsibility at every step</strong><p>Mirvai manages the sourcing and communication journey. The appropriate independent professionals provide specialist findings, and you review those findings before deciding whether to proceed.</p></div></div></section>;
+  return <section className="trust-proof section" id="about">
+    <div className="trust-identity">
+      <p className="section-label">About Mirvai</p>
+      <h2>Built on trust, not shortcuts.</h2>
+      <p>Buying property in Lagos should not mean guessing who to trust. Unclear information and distance make it difficult for buyers—especially Nigerians living abroad—to find properties that match their exact needs and budgets. Mirvai provides a verified, transparent path through carefully sourced options, independent professional checks, and dedicated buyer advisory from initial search to final deed registration.</p>
+    </div>
+    <div className="trust-process">
+      <p className="section-label">The Mirvai due-diligence journey</p>
+      {steps.map(([number, title, copy]) => (
+        <article key={number}>
+          <b>{number}</b>
+          <div>
+            <h3>{title}</h3>
+            <p>{copy}</p>
+          </div>
+        </article>
+      ))}
+      <div className="role-note">
+        <strong>Clear responsibility at every step</strong>
+        <p>Mirvai manages the sourcing and communication journey. The appropriate independent professionals provide specialist findings, and you review those findings before deciding whether to proceed.</p>
+      </div>
+    </div>
+  </section>;
 }
 
-function BuyerGuidesSection() {
-  return <section className="home-guides section"><div className="home-guides-head"><div><p className="section-label">Buyer knowledge</p><h2>Understand the process before you commit.</h2></div><p>Clear, practical guidance for Lagos buyers and Nigerians investing from abroad.</p></div><div className="home-guide-grid">{buyerGuides.map((guide, index) => <article key={guide.slug}><span>{String(index + 1).padStart(2, "0")}</span><small>{guide.kicker}</small><h3>{guide.title}</h3><p>{guide.description}</p><Link href={`/guides/${guide.slug}`}>Read guide <b aria-hidden="true">→</b></Link></article>)}</div><Link className="text-link dark home-guides-link" href="/guides">View all buyer guides</Link></section>;
+function CompactAppDownloadStrip() {
+  return (
+    <aside className="w-full bg-[#071911] border-y border-[#1a3d2e] py-4 sm:py-5 px-4 sm:px-8" aria-label="Download Mirvai Mobile App">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5 text-center sm:text-left">
+          <div className="w-10 h-10 rounded-sm bg-[#cca462] flex items-center justify-center font-serif text-xl font-bold text-[#082216] shrink-0 select-none shadow-sm">
+            M
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[#f0eee8] m-0">
+              Get Mirvai on Google Play
+            </p>
+            <span className="text-xs text-[#9bb3a6]">
+              Verified Lagos listings, title documentation tracking &amp; instant WhatsApp advisory
+            </span>
+          </div>
+        </div>
+        <a
+          href="https://play.google.com/store/apps/details?id=com.mirvai.app"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-5 py-2.5 rounded-lg bg-[#cca462] hover:bg-[#deb26d] text-[#082216] font-bold text-xs sm:text-sm transition-all shadow-md shrink-0 inline-flex items-center gap-2"
+        >
+          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M3.609 1.814L13.792 12 3.61 22.186a1.5 1.5 0 0 1-.61-.926V2.74a1.5 1.5 0 0 1 .609-.926zm11.238 11.241l2.585-2.585-11.83-6.83 9.245 9.415zm0 1.89L5.602 24.36l11.83-6.83-2.585-2.585zm1.488-1.488l3.158-1.823c.895-.517.895-1.365 0-1.882l-3.158-1.823-2.032 2.032 2.032 2.096z" />
+          </svg>
+          <span>Download on Google Play</span>
+        </a>
+      </div>
+    </aside>
+  );
 }
 
 function ClientActionSection() {

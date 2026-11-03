@@ -15,35 +15,27 @@ export const MirvaiLogo: React.FC<MirvaiLogoProps> = ({
 }) => {
   if (variant === 'monogram') {
     return (
-      <div className={`relative flex items-center justify-center rounded-xl overflow-hidden border border-[#d5a55d]/40 bg-[#0e1f16] shadow-md ${
-        size === 'sm' ? 'w-8 h-8 text-sm' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-base'
+      <div className={`relative flex items-center justify-center rounded-sm bg-[#cca462] shadow-sm select-none ${
+        size === 'sm' ? 'w-8 h-8 text-lg' : size === 'lg' ? 'w-14 h-14 text-3xl' : 'w-10 h-10 text-2xl'
       } ${className}`}>
-        <img
-          src="/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg"
-          alt="Mirvai"
-          className="w-full h-full object-cover scale-125 brightness-110"
-        />
+        <span className="font-serif font-bold text-[#082216]">M</span>
       </div>
     );
   }
 
   if (variant === 'badge') {
     return (
-      <div className={`inline-flex items-center gap-2.5 ${className}`}>
-        <div className="w-9 h-9 rounded-xl overflow-hidden border border-[#d5a55d]/40 bg-[#08170f] shadow-inner shrink-0">
-          <img
-            src="/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg"
-            alt="Mirvai Crest"
-            className="w-full h-full object-cover scale-110"
-          />
+      <div className={`inline-flex items-center gap-3 ${className}`}>
+        <div className="w-10 h-10 rounded-sm bg-[#cca462] shadow-sm shrink-0 flex items-center justify-center select-none">
+          <span className="font-serif text-2xl font-bold text-[#082216]">M</span>
         </div>
         <div className="flex flex-col">
-          <span className="font-brand text-sm tracking-[0.22em] text-[#f0eee8] font-bold uppercase leading-none">
-            Mirvai
+          <span className="font-brand text-sm tracking-[0.28em] text-[#082216] dark:text-[#f0eee8] font-bold uppercase leading-tight">
+            MIRVAI
           </span>
           {showTagline && (
-            <span className="text-[9px] tracking-[0.25em] text-[#d5a55d] font-medium uppercase mt-1">
-              Find · Grow · Invest
+            <span className="text-[8px] sm:text-[9px] tracking-[0.22em] text-[#9b7b46] dark:text-[#cca462] font-semibold uppercase mt-0.5">
+              GROUP · REAL ESTATE
             </span>
           )}
         </div>
@@ -54,14 +46,10 @@ export const MirvaiLogo: React.FC<MirvaiLogoProps> = ({
   // Full variant (Hero or Splash)
   return (
     <div className={`flex flex-col items-center text-center ${className}`}>
-      <div className={`relative rounded-2xl overflow-hidden border border-[#d5a55d]/40 shadow-2xl bg-[#06130b] mb-3 ${
-        size === 'hero' ? 'w-28 h-28' : size === 'lg' ? 'w-20 h-20' : 'w-14 h-14'
+      <div className={`relative rounded-2xl border border-[#d5a55d]/50 shadow-2xl bg-[#06130b] mb-3 flex items-center justify-center ${
+        size === 'hero' ? 'w-24 h-24 text-4xl' : size === 'lg' ? 'w-20 h-20 text-3xl' : 'w-14 h-14 text-2xl'
       }`}>
-        <img
-          src="/assets/aistudio/IMG-20261024-WA0026_1__bcc678a3.jpg"
-          alt="Mirvai Realty & Investment"
-          className="w-full h-full object-cover"
-        />
+        <span className="font-serif font-bold text-[#d5a55d]">M</span>
       </div>
       <h2 className="font-brand text-xl sm:text-2xl font-bold tracking-[0.28em] text-[#f7e8ce] uppercase">
         M I R V A I

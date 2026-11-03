@@ -760,3 +760,43 @@ body{font-family:var(--sans);text-rendering:optimizeLegibility}
   color: #25d366 !important;
 }
 
+/* Reference Exact Menu & Header Alignment (Screenshot_20261103 & IMG-20261102-WA0011) */
+.site-menu-trigger {
+  color: #082216 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.theme-dark .site-menu-trigger,
+[data-theme="dark"] .site-menu-trigger {
+  color: #f0eee8 !important;
+}
+
+.menu-bars {
+  width: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-bars i {
+  display: block;
+  width: 100%;
+  height: 2.5px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.site-menu-overlay {
+  background: #072218 !important;
+  color: #f6f1e8 !important;
+}
+
+.site-menu-top {
+  border-bottom: 1px solid #1a4233 !important;
+}
+
+.site-menu-footer {
+  border-top: 1px solid #1a4233 !important;
+}
+
