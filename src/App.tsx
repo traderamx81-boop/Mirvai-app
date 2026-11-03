@@ -5,8 +5,9 @@ import { MirvaiWebsitePropertyDetail } from './components/MirvaiWebsitePropertyD
 import { MirvaiWebsiteGuides } from './components/MirvaiWebsiteGuides';
 import { MirvaiWebsiteGuideDetail } from './components/MirvaiWebsiteGuideDetail';
 import { MirvaiWebsitePrivacy } from './components/MirvaiWebsitePrivacy';
+import { MirvaiAdminPortal } from './components/admin/MirvaiAdminPortal';
 
-type WebsiteSubPage = 'home' | 'properties' | 'property-detail' | 'guides' | 'guide-detail' | 'privacy';
+type WebsiteSubPage = 'home' | 'properties' | 'property-detail' | 'guides' | 'guide-detail' | 'privacy' | 'admin';
 
 export default function App() {
   const [websiteSubPage, setWebsiteSubPage] = useState<WebsiteSubPage>('home');
@@ -64,7 +65,10 @@ export default function App() {
       const customEvent = e as CustomEvent<{ href: string }> | undefined;
       const href = customEvent?.detail?.href || (typeof window !== 'undefined' ? window.location.pathname + window.location.search + window.location.hash : '');
 
-      if (href.startsWith('/properties/') && !href.startsWith('/properties?')) {
+      if (href === '/admin' || href.startsWith('/admin?') || href.startsWith('/admin#')) {
+        setWebsiteSubPage('admin');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (href.startsWith('/properties/') && !href.startsWith('/properties?')) {
         const pathPart = href.split('?')[0].split('#')[0];
         const slug = pathPart.replace('/properties/', '');
         setWebsiteSubPage('property-detail');
@@ -115,6 +119,21 @@ export default function App() {
       }
     };
 
+    // Check initial path on load
+    if (typeof window !== 'undefined') {
+      const search = window.location.search;
+      const isDirectAdmin = 
+        window.location.pathname === '/admin' || 
+        window.location.pathname.startsWith('/admin') ||
+        window.location.hash === '#admin' || 
+        search.includes('admin') ||
+        search.includes('page=admin');
+
+      if (isDirectAdmin) {
+        setWebsiteSubPage('admin');
+      }
+    }
+
     window.addEventListener('mirvai:navigate', handleNav);
     window.addEventListener('popstate', handleNav);
     return () => {
@@ -131,7 +150,7 @@ export default function App() {
         <div className="absolute bottom-[-5%] right-[10%] w-[500px] h-[500px] rounded-full bg-[#d5a55d]/5 blur-[160px]" />
       </div>
 
-      {/* OFFICIAL MIRVAI WEBSITE */}
+      {/* OFFICIAL MIRVAI WEBSITE & ADMIN PORTAL */}
       <div
         className={`w-full mirvai-website-container ${theme === 'dark' ? 'theme-dark' : 'theme-light'} relative z-10 transition-colors duration-300`}
         data-theme={theme}
@@ -142,6 +161,7 @@ export default function App() {
         {websiteSubPage === 'guides' && <MirvaiWebsiteGuides />}
         {websiteSubPage === 'guide-detail' && <MirvaiWebsiteGuideDetail slug={activeSlug} />}
         {websiteSubPage === 'privacy' && <MirvaiWebsitePrivacy />}
+        {websiteSubPage === 'admin' && <MirvaiAdminPortal onNavigateHome={() => setWebsiteSubPage('home')} />}
       </div>
     </div>
   );

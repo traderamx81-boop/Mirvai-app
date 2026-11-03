@@ -131,13 +131,6 @@ export default function PropertyExploreMenu() {
                 >
                   Buyer guides
                 </Link>
-                <Link
-                  href="/#enquire"
-                  onClick={close}
-                  className="font-serif text-2xl sm:text-3xl text-[#f6f1e8] hover:text-[#cca462] py-3.5 border-b border-[#1b3d30] block transition-colors"
-                >
-                  Make an enquiry
-                </Link>
               </nav>
 
               {/* Right Column: Browse by property type */}

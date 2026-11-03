@@ -1,0 +1,222 @@
+{
+  "properties": [
+    {
+      "id": "mirvai-ikeja-001",
+      "reference": "MIR-IKE-001",
+      "slug": "luxury-4-bedroom-terrace-duplex-adeniyi-jones",
+      "title": "Luxury 4-Bedroom Terrace Duplex with BQ",
+      "location": "Adeniyi Jones, Ikeja, Lagos",
+      "type": "Terrace duplex",
+      "category": "terrace-duplex",
+      "price": 400000000,
+      "status": "Available",
+      "completionStatus": "Fully completed",
+      "titleDocument": "Governor’s Consent",
+      "description": "A fully completed four-bedroom luxury terrace duplex with boy's quarters in Adeniyi Jones, Ikeja. Modern architecture with generous living spaces, an ante-room, all en-suite bedrooms, fitted marble kitchen and quality sanitary fittings. Gated environment in an established Ikeja neighbourhood.",
+      "image_url": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=80",
+      "image_key": null,
+      "verified": 1,
+      "featured": true,
+      "features": [
+        "Governor's Consent Title",
+        "Modern contemporary architecture",
+        "Spacious living area with ante-room",
+        "All rooms en-suite with walk-in wardrobes",
+        "Fully fitted Italian marble kitchen",
+        "Self-contained boy's quarters (BQ)",
+        "24/7 Security & CCTV surveillance"
+      ],
+      "createdAt": "2026-11-03T22:48:05.119Z"
+    },
+    {
+      "id": "mirvai-lekki-002",
+      "reference": "MIR-LEK-002",
+      "slug": "contemporary-5-bedroom-fully-detached-lekki-1",
+      "title": "Contemporary 5-Bedroom Detached Villa with Pool",
+      "location": "Admiralty Way Corridor, Lekki Phase 1, Lagos",
+      "type": "Fully detached duplex",
+      "category": "fully-detached-duplex",
+      "price": 650000000,
+      "status": "Available",
+      "completionStatus": "Ready for move-in",
+      "titleDocument": "Governor’s Consent",
+      "description": "Exceptional modern mansion featuring private infinity swimming pool, smart automated access control, elevator, double volume living room, and German fitted chef kitchen with Miele appliances.",
+      "image_url": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1400&q=80",
+      "image_key": null,
+      "verified": 1,
+      "featured": true,
+      "features": [
+        "Verified Governor's Consent",
+        "Private swimming pool & cabana",
+        "Cinema room & private elevator",
+        "Smart home lighting & climate automation",
+        "Industrial water treatment plant",
+        "Dedicated 4-car garage"
+      ],
+      "createdAt": "2026-11-03T22:48:05.120Z"
+    },
+    {
+      "id": "mirvai-ikoyi-003",
+      "reference": "MIR-IKY-003",
+      "slug": "waterfront-3-bedroom-luxury-penthouse-ikoyi",
+      "title": "Waterfront 3-Bedroom Penthouse with Panoramic Views",
+      "location": "Bouridllon / Waterfront, Ikoyi, Lagos",
+      "type": "Penthouse",
+      "category": "apartments-penthouses",
+      "price": 850000000,
+      "status": "Under Offer",
+      "completionStatus": "Brand new",
+      "titleDocument": "Federal Certificate of Occupancy",
+      "description": "Ultra-prime waterfront penthouse boasting expansive 180-degree lagoon views, wraparound entertaining terraces, private boat jetty access, 24/7 uninterrupted power, and club amenities.",
+      "image_url": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=80",
+      "image_key": null,
+      "verified": 1,
+      "featured": true,
+      "features": [
+        "Federal C of O with clean root of title",
+        "Expansive lagoon waterfront terraces",
+        "24-Hour uninterrupted turbine power",
+        "Private boat slip & jetty access",
+        "Olympics-size communal pool & gym",
+        "High diaspora rental yield (12.5% USD)"
+      ],
+      "createdAt": "2026-11-03T22:48:05.120Z"
+    },
+    {
+      "id": "mirvai-epe-004",
+      "reference": "MIR-EPE-004",
+      "slug": "prime-waterfront-commercial-residential-land-epe",
+      "title": "1,200 SQM Dry Waterfront Land (Commercial/Res)",
+      "location": "Alaro City Corridor, Epe Waterfront, Lagos",
+      "type": "Land",
+      "category": "land",
+      "price": 95000000,
+      "status": "Available",
+      "completionStatus": "Ready for construction",
+      "titleDocument": "Gazette & Registered Survey",
+      "description": "100% dry table-land with direct access to dual carriageway. Free from government acquisition, registered survey lodged with surveyor-general, ideal for luxury residential subdivision or long-term capital appreciation.",
+      "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80",
+      "image_key": null,
+      "verified": 1,
+      "featured": false,
+      "features": [
+        "Registered Gazette & survey beacon validation",
+        "100% dry table land (zero sand filling)",
+        "Direct tarred access to Lekki-Epe expressway",
+        "Rapidly appreciating high-growth corridor"
+      ],
+      "createdAt": "2026-11-03T22:48:05.120Z"
+    }
+  ],
+  "settings": {
+    "heroKickerTop": "Lagos · Nigeria · Diaspora",
+    "heroKickerBottom": "Buy · Sell · Invest",
+    "heroHeadlineMain": "Property decisions,",
+    "heroHeadlineEm": "made with confidence.",
+    "heroCopy": "We help you find, evaluate and secure the right property in Lagos—wherever you are in the world.",
+    "whatsapp": "2349011081436",
+    "contactEmail": "advisory@mirvaigroup.com",
+    "officeLocation": "Admiralty Way Corridor, Lekki Phase 1 / Ikeja, Lagos",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.mirvai.app",
+    "trustPoints": [
+      "Verified options",
+      "Clear guidance",
+      "End-to-end support"
+    ],
+    "announcement": "",
+    "showAnnouncement": false
+  },
+  "conversations": [
+    {
+      "id": "conv-1793746140388",
+      "visitorToken": "e0647ec5-36d2-46f3-b6db-6ce62f88681a",
+      "name": "Guest Visitor",
+      "contact": "Direct Web Visitor",
+      "status": "active",
+      "unreadByAdmin": 0,
+      "unreadByVisitor": 1,
+      "lastMessage": "Title verification is complete. Governor's Consent is unencumbered.",
+      "updatedAt": "2026-11-03T22:49:52.923Z",
+      "createdAt": "2026-11-03T22:49:00.328Z"
+    },
+    {
+      "id": "conv-seed-1",
+      "visitorToken": "visitor-seed-1",
+      "name": "Tunde Adebayo",
+      "contact": "+44 7911 123456 (London, UK)",
+      "status": "active",
+      "unreadByAdmin": 0,
+      "unreadByVisitor": 0,
+      "lastMessage": "Can we verify the Governor's Consent for the 4-bedroom duplex in Adeniyi Jones?",
+      "updatedAt": "2026-11-03T22:33:05.120Z",
+      "createdAt": "2026-11-03T21:48:05.120Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-seed-1",
+      "conversationId": "conv-seed-1",
+      "sender": "visitor",
+      "body": "Hello Mirvai, I am a Nigerian based in London. I saw the Adeniyi Jones property.",
+      "senderName": "Tunde Adebayo",
+      "createdAt": "2026-11-03T22:03:05.120Z",
+      "timeString": "45m ago"
+    },
+    {
+      "id": "msg-seed-2",
+      "conversationId": "conv-seed-1",
+      "sender": "admin",
+      "body": "Good afternoon Tunde! Welcome to Mirvai Senior Advisory. We coordinate full legal due diligence and drone viewings for diaspora buyers.",
+      "senderName": "Senior Advisor (Mirvai)",
+      "createdAt": "2026-11-03T22:18:05.120Z",
+      "timeString": "30m ago"
+    },
+    {
+      "id": "msg-seed-3",
+      "conversationId": "conv-seed-1",
+      "sender": "visitor",
+      "body": "Can we verify the Governor's Consent for the 4-bedroom duplex in Adeniyi Jones?",
+      "senderName": "Tunde Adebayo",
+      "createdAt": "2026-11-03T22:33:05.120Z",
+      "timeString": "15m ago"
+    },
+    {
+      "id": "msg-1793746140388",
+      "conversationId": "conv-1793746140388",
+      "sender": "visitor",
+      "senderName": "Guest Visitor",
+      "body": "Lekki & Ikoyi Price List",
+      "createdAt": "2026-11-03T22:49:00.328Z",
+      "timeString": "10:49 PM"
+    },
+    {
+      "id": "msg-1793746192923",
+      "conversationId": "conv-1793746140388",
+      "sender": "admin",
+      "senderName": "Senior Advisor (Mirvai)",
+      "body": "Title verification is complete. Governor's Consent is unencumbered.",
+      "createdAt": "2026-11-03T22:49:52.923Z",
+      "timeString": "10:49 PM"
+    }
+  ],
+  "analytics": [
+    {
+      "event": "page_view",
+      "path": "/",
+      "sessionId": "5afcc294-6373-4d41-8c5a-41c6aa7e9fa1",
+      "timestamp": "2026-11-03T22:48:17.806Z"
+    },
+    {
+      "event": "page_view",
+      "path": "/",
+      "sessionId": "5afcc294-6373-4d41-8c5a-41c6aa7e9fa1",
+      "timestamp": "2026-11-03T22:50:16.931Z"
+    },
+    {
+      "event": "page_view",
+      "path": "/",
+      "sessionId": "5afcc294-6373-4d41-8c5a-41c6aa7e9fa1",
+      "timestamp": "2026-11-03T22:55:05.456Z"
+    }
+  ]
+}
