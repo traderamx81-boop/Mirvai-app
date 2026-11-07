@@ -292,8 +292,16 @@ function broadcastRealtime(event: string, payload: any) {
 
 async function startServer() {
   const app = express();
-  app.use(express.json({ limit: '15mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+  // Favicon explicit route
+  app.get(['/favicon.ico', '/favicon.svg'], (_req: Request, res: Response) => {
+    const faviconPath = path.join(__dirname, 'public', 'favicon.svg');
+    if (fs.existsSync(faviconPath)) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.sendFile(faviconPath);
+    }
+    res.status(404).end();
+  });
 
   // SSE Real-Time Endpoint
   app.get('/api/realtime/stream', (req: Request, res: Response) => {
