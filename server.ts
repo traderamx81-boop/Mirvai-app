@@ -292,13 +292,34 @@ function broadcastRealtime(event: string, payload: any) {
 
 async function startServer() {
   const app = express();
-  // Favicon explicit route
-  app.get(['/favicon.ico', '/favicon.svg'], (_req: Request, res: Response) => {
-    const faviconPath = path.join(__dirname, 'public', 'favicon.svg');
-    if (fs.existsSync(faviconPath)) {
+  // Favicon explicit routes
+  app.get('/favicon.ico', (_req: Request, res: Response) => {
+    const icoPath = path.join(__dirname, 'public', 'favicon.ico');
+    if (fs.existsSync(icoPath)) {
+      res.setHeader('Content-Type', 'image/x-icon');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.sendFile(icoPath);
+    }
+    res.status(404).end();
+  });
+
+  app.get('/favicon.svg', (_req: Request, res: Response) => {
+    const svgPath = path.join(__dirname, 'public', 'favicon.svg');
+    if (fs.existsSync(svgPath)) {
       res.setHeader('Content-Type', 'image/svg+xml');
       res.setHeader('Cache-Control', 'public, max-age=86400');
-      return res.sendFile(faviconPath);
+      return res.sendFile(svgPath);
+    }
+    res.status(404).end();
+  });
+
+  app.get(['/favicon-48x48.png', '/apple-touch-icon.png'], (req: Request, res: Response) => {
+    const imgName = req.path.replace('/', '');
+    const imgPath = path.join(__dirname, 'public', imgName);
+    if (fs.existsSync(imgPath)) {
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.sendFile(imgPath);
     }
     res.status(404).end();
   });

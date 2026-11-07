@@ -6,6 +6,13 @@ import Link from "next/link";
 import PropertyExploreMenu from "@/components/property-explore-menu";
 import MirvaiBrand from "@/components/mirvai-brand";
 import { formatNaira, propertyCategories, type PublicProperty, withFeaturedProperty } from "@/lib/featured-property";
+import {
+  fetchAllProperties,
+  fetchWebsiteSettings,
+  fetchVisitorConversation,
+  postVisitorMessage,
+  supabase,
+} from "../../src/lib/supabase";
 
 const DEFAULT_WA = "2349011081436";
 
@@ -62,15 +69,33 @@ export default function Home() {
   useEffect(() => {
     trackEvent("page_view");
 
-    // Fetch initial settings
-    fetch("/api/website-settings")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data) setSettings(data);
-      })
-      .catch(() => {});
+    // Fetch initial settings from Supabase or local API
+    fetchWebsiteSettings().then((data) => {
+      if (data) setSettings(data);
+    });
 
-    // Real-time SSE updates for settings
+    // Real-time Supabase subscription if configured
+    if (supabase) {
+      const sb = supabase;
+      const channel = sb
+        .channel("public:website_settings")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "website_settings" },
+          () => {
+            fetchWebsiteSettings().then((data) => {
+              if (data) setSettings(data);
+            });
+          }
+        )
+        .subscribe();
+
+      return () => {
+        sb.removeChannel(channel);
+      };
+    }
+
+    // Real-time SSE updates fallback for local environment
     let eventSource: EventSource | null = null;
     try {
       eventSource = new EventSource("/api/realtime/stream");
@@ -380,17 +405,34 @@ function PropertyGrid({ onOpenChat }: { onOpenChat: () => void }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProps = () => {
-    fetch("/api/properties")
-      .then((response) =>
-        response.ok ? (response.json() as Promise<PublicProperty[]>) : []
-      )
-      .then((properties) => setItems(withFeaturedProperty(properties)))
+    fetchAllProperties()
+      .then((properties) => {
+        setItems(withFeaturedProperty(properties as PublicProperty[]));
+      })
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchProps();
+
+    if (supabase) {
+      const sb = supabase;
+      const channel = sb
+        .channel("public:properties")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "properties" },
+          () => {
+            fetchProps();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        sb.removeChannel(channel);
+      };
+    }
 
     let eventSource: EventSource | null = null;
     try {
@@ -618,11 +660,10 @@ function WebsiteChat({ whatsappNumber }: { whatsappNumber: string }) {
     return () => window.removeEventListener("mirvai:open-chat", handleOpenEvent);
   }, []);
 
-  // Sync past conversation with backend on mount
+  // Sync past conversation on mount
   useEffect(() => {
     if (!token) return;
-    fetch(`/api/chat?token=${encodeURIComponent(token)}`)
-      .then((res) => (res.ok ? res.json() : null))
+    fetchVisitorConversation(token)
       .then((data) => {
         if (data && data.messages && data.messages.length > 0) {
           const backendMsgs: ChatMessage[] = data.messages.map((m: any) => ({
@@ -638,8 +679,45 @@ function WebsiteChat({ whatsappNumber }: { whatsappNumber: string }) {
       .catch(() => {});
   }, [token]);
 
-  // Connect to SSE stream for live real-time two-way replies from admin desk!
+  // Connect to Supabase Realtime channel or fallback to SSE
   useEffect(() => {
+    if (supabase) {
+      const sb = supabase;
+      const channel = sb
+        .channel("public:chat_messages")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "chat_messages" },
+          (payload: any) => {
+            const m = payload.new;
+            if (m) {
+              const mappedMsg: ChatMessage = {
+                id: m.id,
+                sender: m.sender === "admin" ? "advisor" : "visitor",
+                body: m.body,
+                time: m.time_string || "Just now",
+                senderName: m.sender_name,
+              };
+
+              setMessages((prev) => {
+                if (prev.some((x) => x.id === mappedMsg.id)) return prev;
+                return [...prev, mappedMsg];
+              });
+
+              if (!open && m.sender === "admin") {
+                setUnreadCount((c) => c + 1);
+              }
+              setIsTyping(false);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        sb.removeChannel(channel);
+      };
+    }
+
     let eventSource: EventSource | null = null;
     try {
       eventSource = new EventSource("/api/realtime/stream");
@@ -711,23 +789,18 @@ function WebsiteChat({ whatsappNumber }: { whatsappNumber: string }) {
     setStatus("Connecting live to Mirvai Senior Desk…");
 
     try {
-      await fetch("/api/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          token,
-          name: name || "Guest Visitor",
-          contact: contact || "Direct Web Visitor",
-          message: text,
-        }),
-      });
+      await postVisitorMessage(
+        token,
+        name || "Guest Visitor",
+        contact || "Direct Web Visitor",
+        text
+      );
       setStatus("Sent directly to Mirvai Senior Desk.");
       setTimeout(() => setStatus(""), 2000);
     } catch {
       setStatus("Network error sending message. Please use WhatsApp.");
     }
 
-    // Gentle automated reassuring feedback if admin hasn't responded after 2.5s
     setTimeout(() => {
       setIsTyping(false);
     }, 2500);

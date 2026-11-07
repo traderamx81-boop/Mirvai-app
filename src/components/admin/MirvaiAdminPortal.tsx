@@ -21,66 +21,25 @@ import {
   AlertCircle,
   X,
   Search,
-  Filter
+  Filter,
+  Database
 } from 'lucide-react';
 
-interface StoredProperty {
-  id: string;
-  reference: string;
-  slug: string;
-  title: string;
-  location: string;
-  type: string;
-  category: string;
-  price: number;
-  status: string;
-  completionStatus?: string;
-  titleDocument?: string;
-  description: string;
-  image_url: string;
-  verified: number;
-  featured?: boolean;
-  features: string[];
-  createdAt: string;
-}
-
-interface WebsiteSettings {
-  heroKickerTop: string;
-  heroKickerBottom: string;
-  heroHeadlineMain: string;
-  heroHeadlineEm: string;
-  heroCopy: string;
-  whatsapp: string;
-  contactEmail: string;
-  officeLocation: string;
-  playStoreUrl: string;
-  trustPoints: string[];
-  announcement: string;
-  showAnnouncement: boolean;
-}
-
-interface ChatMessage {
-  id: string;
-  conversationId: string;
-  sender: 'visitor' | 'admin';
-  body: string;
-  senderName?: string;
-  createdAt: string;
-  timeString: string;
-}
-
-interface ChatConversation {
-  id: string;
-  visitorToken: string;
-  name: string;
-  contact: string;
-  status: 'active' | 'resolved' | 'archived';
-  unreadByAdmin: number;
-  unreadByVisitor: number;
-  lastMessage: string;
-  updatedAt: string;
-  createdAt: string;
-}
+import {
+  fetchAllProperties,
+  fetchWebsiteSettings,
+  fetchAdminChatData,
+  upsertProperty,
+  removeProperty,
+  saveWebsiteSettings,
+  postAdminReply,
+  isSupabaseConfigured,
+  supabase,
+  type StoredProperty,
+  type WebsiteSettings,
+  type ChatConversation,
+  type ChatMessage,
+} from '../../lib/supabase';
 
 export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ onNavigateHome }) => {
   const [activeTab, setActiveTab] = useState<'properties' | 'website' | 'chat'>('properties');
@@ -162,27 +121,18 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [propsRes, setRes, chatRes] = await Promise.all([
-        fetch('/api/properties'),
-        fetch('/api/website-settings'),
-        fetch('/api/chat/admin'),
+      const [props, s, chatData] = await Promise.all([
+        fetchAllProperties(),
+        fetchWebsiteSettings(),
+        fetchAdminChatData(),
       ]);
 
-      if (propsRes.ok) {
-        const p = await propsRes.json();
-        setProperties(p);
-      }
-      if (setRes.ok) {
-        const s = await setRes.json();
-        setSettings(s);
-      }
-      if (chatRes.ok) {
-        const c = await chatRes.json();
-        setConversations(c.conversations || []);
-        setMessages(c.messages || []);
-        if (!selectedConvId && c.conversations && c.conversations.length > 0) {
-          setSelectedConvId(c.conversations[0].id);
-        }
+      setProperties(props);
+      if (s) setSettings(s);
+      setConversations(chatData.conversations || []);
+      setMessages(chatData.messages || []);
+      if (!selectedConvId && chatData.conversations && chatData.conversations.length > 0) {
+        setSelectedConvId(chatData.conversations[0].id);
       }
     } catch (err) {
       console.error('Admin data fetch error:', err);
@@ -195,8 +145,65 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
     fetchData();
   }, []);
 
-  // Connect to Real-Time SSE stream
+  // Connect to Real-Time (Supabase WebSocket Channel or Local SSE Stream)
   useEffect(() => {
+    if (supabase) {
+      const sb = supabase;
+      setRealtimeConnected(true);
+      const channel = sb
+        .channel('admin:realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'properties' },
+          () => {
+            fetchAllProperties().then((p) => setProperties(p));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'website_settings' },
+          () => {
+            fetchWebsiteSettings().then((s) => {
+              if (s) setSettings(s);
+            });
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'chat_conversations' },
+          () => {
+            fetchAdminChatData().then((d) => setConversations(d.conversations));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+          (payload: any) => {
+            const m = payload.new;
+            if (m) {
+              const mappedMsg: ChatMessage = {
+                id: m.id,
+                conversationId: m.conversation_id,
+                sender: m.sender,
+                senderName: m.sender_name,
+                body: m.body,
+                timeString: m.time_string || 'Recent',
+                createdAt: m.created_at,
+              };
+              setMessages((prev) => {
+                if (prev.some((x) => x.id === mappedMsg.id)) return prev;
+                return [...prev, mappedMsg];
+              });
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        sb.removeChannel(channel);
+      };
+    }
+
     let eventSource: EventSource | null = null;
     try {
       eventSource = new EventSource('/api/realtime/stream');
@@ -311,30 +318,35 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
     e.preventDefault();
     setSaveStatus('Saving property…');
 
-    const payload = {
-      ...propertyFormData,
+    const payload: Partial<StoredProperty> = {
+      ...(editingProperty ? { id: editingProperty.id } : {}),
+      title: propertyFormData.title,
+      reference: propertyFormData.reference,
+      location: propertyFormData.location,
+      type: propertyFormData.type,
+      category: propertyFormData.category,
       price: Number(propertyFormData.price) || 0,
+      status: propertyFormData.status,
+      completionStatus: propertyFormData.completionStatus,
+      titleDocument: propertyFormData.titleDocument,
+      description: propertyFormData.description,
+      image_url: propertyFormData.image_url,
+      verified: propertyFormData.verified,
+      featured: propertyFormData.featured,
       features: propertyFormData.features.split('\n').map((f) => f.trim()).filter(Boolean),
     };
 
     try {
-      const url = editingProperty ? `/api/properties/${editingProperty.id}` : '/api/properties';
-      const method = editingProperty ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
+      const saved = await upsertProperty(payload);
+      if (saved) {
         setSaveStatus(editingProperty ? 'Property updated live!' : 'Property published live!');
         setPropertyModalOpen(false);
+        fetchData();
         setTimeout(() => setSaveStatus(''), 3000);
       } else {
         setSaveStatus('Failed to save property. Please check input.');
       }
-    } catch (err) {
+    } catch {
       setSaveStatus('Network error while saving property.');
     }
   };
@@ -344,10 +356,13 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
     if (!window.confirm(`Are you sure you want to delete "${title}"? This cannot be undone.`)) return;
 
     try {
-      const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
-      if (res.ok) {
+      const ok = await removeProperty(id);
+      if (ok) {
         setSaveStatus('Property deleted successfully.');
+        setProperties((prev) => prev.filter((p) => p.id !== id));
         setTimeout(() => setSaveStatus(''), 3000);
+      } else {
+        alert('Failed to delete property.');
       }
     } catch {
       alert('Failed to delete property.');
@@ -358,11 +373,8 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
   const handleToggleVerified = async (prop: StoredProperty) => {
     const nextVal = prop.verified ? 0 : 1;
     try {
-      await fetch(`/api/properties/${prop.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ verified: nextVal }),
-      });
+      await upsertProperty({ id: prop.id, verified: nextVal });
+      setProperties((prev) => prev.map((p) => (p.id === prop.id ? { ...p, verified: nextVal } : p)));
     } catch {}
   };
 
@@ -373,13 +385,8 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
     setSaveStatus('Updating live website settings…');
 
     try {
-      const res = await fetch('/api/website-settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
-
-      if (res.ok) {
+      const ok = await saveWebsiteSettings(settings);
+      if (ok) {
         setSaveStatus('Website landing page updated live!');
         setTimeout(() => setSaveStatus(''), 4000);
       } else {
@@ -399,15 +406,15 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
     setAdminReplyText('');
 
     try {
-      await fetch('/api/chat/admin/reply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId: selectedConvId,
-          body,
-          adminName: 'Senior Advisor (Mirvai)',
-        }),
-      });
+      const ok = await postAdminReply(selectedConvId, body);
+      if (ok) {
+        fetchAdminChatData().then((d) => {
+          setConversations(d.conversations);
+          setMessages(d.messages);
+        });
+      } else {
+        alert('Failed to deliver reply.');
+      }
     } catch {
       alert('Failed to deliver reply.');
     }
@@ -520,10 +527,17 @@ export const MirvaiAdminPortal: React.FC<{ onNavigateHome: () => void }> = ({ on
             <span className="text-xs tracking-[0.2em] uppercase font-bold text-[#cca462]">
               SENIOR ADMIN CRM
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-600/40 font-medium">
-              <span className={`w-1.5 h-1.5 rounded-full ${realtimeConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-              {realtimeConnected ? 'Real-Time Connected' : 'Syncing'}
-            </span>
+            {isSupabaseConfigured() ? (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Supabase Cloud Connected
+              </span>
+            ) : (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] bg-[#112d1e] text-[#cca462] border border-[#cca462]/30 font-medium">
+                <span className={`w-1.5 h-1.5 rounded-full ${realtimeConnected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                {realtimeConnected ? 'Local Engine (Add Supabase keys for Vercel)' : 'Connecting'}
+              </span>
+            )}
           </div>
         </div>
 
