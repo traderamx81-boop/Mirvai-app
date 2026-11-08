@@ -1,0 +1,25 @@
+# Mirvai Group Robots Configuration
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Googlebot specific rules to ensure favicon and images are freely crawlable
+User-agent: Googlebot
+Allow: /
+Allow: /favicon.ico
+Allow: /favicon.svg
+Allow: /favicon*.png
+Allow: /apple-touch-icon.png
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /favicon*
+Allow: /*.png$
+Allow: /*.jpg$
+Allow: /*.jpeg$
+Allow: /*.svg$
+
+Sitemap: https://mirvaigroup.com/sitemap.xml

@@ -313,7 +313,27 @@ async function startServer() {
     res.status(404).end();
   });
 
-  app.get(['/favicon-48x48.png', '/apple-touch-icon.png'], (req: Request, res: Response) => {
+  app.get('/sitemap.xml', (_req: Request, res: Response) => {
+    const sitemapPath = path.join(__dirname, 'public', 'sitemap.xml');
+    if (fs.existsSync(sitemapPath)) {
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.sendFile(sitemapPath);
+    }
+    res.status(404).end();
+  });
+
+  app.get('/robots.txt', (_req: Request, res: Response) => {
+    const robotsPath = path.join(__dirname, 'public', 'robots.txt');
+    if (fs.existsSync(robotsPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.sendFile(robotsPath);
+    }
+    res.status(404).end();
+  });
+
+  app.get(['/favicon-48x48.png', '/apple-touch-icon.png', '/favicon-16x16.png', '/favicon-32x32.png', '/favicon-96x96.png', '/favicon-192x192.png', '/favicon-512x512.png', '/favicon.png'], (req: Request, res: Response) => {
     const imgName = req.path.replace('/', '');
     const imgPath = path.join(__dirname, 'public', imgName);
     if (fs.existsSync(imgPath)) {
