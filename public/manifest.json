@@ -1,20 +1,33 @@
 {
-  "id": "/",
-  "name": "Mirvai Realty & Investment",
+  "id": "/app",
+  "name": "MIRVAI Client — Private Office",
   "short_name": "Mirvai",
-  "description": "Premium real estate acquisition, diaspora desk, and verified investment properties with seamless user authentication and data privacy.",
-  "start_url": "/",
+  "description": "Private real estate portfolio, diaspora desk, and verified property advisory in Lagos, Nigeria.",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#06130b",
-  "theme_color": "#06130b",
+  "background_color": "#1b1815",
+  "theme_color": "#221f1b",
+  "categories": ["business", "lifestyle", "finance"],
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "192x192 512x512 any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
