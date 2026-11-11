@@ -76,6 +76,20 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- AI Manifest & Machine-Readable System Overview -->
+  <url>
+    <loc>https://mirvaigroup.com/llms.txt</loc>
+    <lastmod>2026-11-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://mirvaigroup.com/llms-full.txt</loc>
+    <lastmod>2026-11-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Privacy Policy -->
   <url>
     <loc>https://mirvaigroup.com/privacy</loc>

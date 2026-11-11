@@ -248,6 +248,7 @@ type ModalType =
   | { type: 'form'; kind: 'viewing' | 'brief' | 'partner' | 'enquire'; id?: string }
   | { type: 'calculator' }
   | { type: 'contact' }
+  | { type: 'ai-manifest' }
   | { type: 'request-added' }
   | { type: 'admin-property'; mode: 'add' | 'edit'; id?: string }
   | null;
@@ -1259,10 +1260,58 @@ export default function App() {
                 Make an enquiry
               </button>
             </div>
+
+            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center', paddingTop: '0.8rem', borderTop: '1px solid var(--line)', marginTop: '0.5rem', fontSize: '0.74rem' }}>
+              <span style={{ color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 650 }}>
+                AI Crawler &amp; Machine Data:
+              </span>
+              <a
+                href="/llms.txt"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--gold)', textDecoration: 'underline', fontWeight: 600 }}
+                title="Standard LLMs.txt AI Manifest for ChatGPT, Claude, Perplexity, Gemini"
+              >
+                /llms.txt
+              </a>
+              <a
+                href="/llms-full.txt"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--muted)', textDecoration: 'underline' }}
+                title="Complete System & Inventory Documentation for AI Agents"
+              >
+                /llms-full.txt
+              </a>
+              <button
+                onClick={() => setModalState({ type: 'ai-manifest' })}
+                style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: 'var(--gold)', cursor: 'pointer', font: 'inherit' }}
+              >
+                AI Crawler Inspection
+              </button>
+              <a
+                href="/sitemap.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--muted)', textDecoration: 'underline' }}
+              >
+                Sitemap
+              </a>
+              <a
+                href="/robots.txt"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--muted)', textDecoration: 'underline' }}
+              >
+                Robots.txt
+              </a>
+            </div>
+
             <small>
               © {new Date().getFullYear()} MIRVAI Holdings. All rights reserved. Lagos Island &amp; Mainland.
             </small>
           </footer>
+
         </div>
       )}
 
@@ -2527,6 +2576,16 @@ export default function App() {
           >
             Direct Contact
           </button>
+          <button
+            className="menu-link"
+            onClick={() => {
+              setDrawerOpen(false);
+              setModalState({ type: 'ai-manifest' });
+            }}
+          >
+            <span>AI &amp; Crawler Manifest</span>
+            <span className="badge active" style={{ fontSize: '0.62rem', background: 'var(--gold)', color: 'var(--charcoal)' }}>llms.txt</span>
+          </button>
         </nav>
       </dialog>
 
@@ -2947,6 +3006,79 @@ export default function App() {
                   onClick={() => setModalState({ type: 'form', kind: 'enquire' })}
                 >
                   Submit Website Enquiry Form
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* AI CRAWLER & MACHINE-READABLE MANIFEST MODAL */}
+          {modalState?.type === 'ai-manifest' && (
+            <>
+              <h2 id="modal-title">AI &amp; Crawler Manifest</h2>
+              <p style={{ color: 'var(--muted)', fontSize: '0.88rem', margin: '0.2rem 0 1rem' }}>
+                How AI search engines, crawlers (ChatGPT, Claude, Perplexity, Google Gemini, Applebot), and automated scrapers read the MIRVAI platform logic and property data.
+              </p>
+
+              <div style={{ display: 'grid', gap: '0.9rem', background: '#211d18', padding: '1.1rem', border: '1px solid var(--line)', borderRadius: '6px', marginBottom: '1.2rem', textAlign: 'left' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <strong style={{ color: 'var(--gold)', fontSize: '0.9rem' }}>1. LLMs.txt AI Manifest</strong>
+                    <span className="badge active" style={{ fontSize: '0.62rem' }}>Standardized</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.3rem 0 0.5rem' }}>
+                    Standard protocol for LLMs and AI web search. Outlines company profile, 6 active properties with prices, 6 ecosystem divisions, diaspora desk services, and contact lines.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="button outline" style={{ minHeight: '34px', padding: '0.3rem 0.8rem', fontSize: '0.78rem' }}>
+                      View /llms.txt ↗
+                    </a>
+                    <a href="/llms-full.txt" target="_blank" rel="noopener noreferrer" className="button outline" style={{ minHeight: '34px', padding: '0.3rem 0.8rem', fontSize: '0.78rem' }}>
+                      View /llms-full.txt ↗
+                    </a>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--line)', paddingTop: '0.8rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <strong style={{ color: 'var(--gold)', fontSize: '0.9rem' }}>2. REST API &amp; Machine-Readable Data</strong>
+                    <span className="badge" style={{ fontSize: '0.62rem' }}>JSON</span>
+                  </div>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.3rem 0 0.5rem' }}>
+                    Direct JSON endpoints for programmatic indexing and real-time retrieval by search agents.
+                  </p>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <a href="/api/properties" target="_blank" rel="noopener noreferrer" className="button outline" style={{ minHeight: '34px', padding: '0.3rem 0.8rem', fontSize: '0.78rem' }}>
+                      /api/properties ↗
+                    </a>
+                    <a href="/api/ai-manifest" target="_blank" rel="noopener noreferrer" className="button outline" style={{ minHeight: '34px', padding: '0.3rem 0.8rem', fontSize: '0.78rem' }}>
+                      /api/ai-manifest ↗
+                    </a>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid var(--line)', paddingTop: '0.8rem' }}>
+                  <strong style={{ color: 'var(--gold)', fontSize: '0.9rem' }}>3. Embedded Schema.org &amp; Semantic Fallback</strong>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--muted)', margin: '0.3rem 0 0' }}>
+                    Includes <code>RealEstateAgent</code>, <code>WebApplication</code>, <code>ItemList</code> (all listings), and <code>FAQPage</code> schemas plus a complete pre-rendered HTML fallback inside <code>#root</code> so non-JS AI scrapers never see an empty page.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.65rem' }}>
+                <button
+                  className="button primary"
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    navigator.clipboard?.writeText(window.location.origin + '/llms.txt');
+                    setToastMessage('Copied https://mirvaigroup.com/llms.txt to clipboard!');
+                    if (toastTimer.current) clearTimeout(toastTimer.current);
+                    toastTimer.current = window.setTimeout(() => setToastMessage(''), 3000);
+                  }}
+                >
+                  Copy AI Manifest Link
+                </button>
+                <button className="button outline" onClick={() => setModalState(null)}>
+                  Close
                 </button>
               </div>
             </>

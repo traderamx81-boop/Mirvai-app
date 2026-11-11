@@ -1,0 +1,152 @@
+# Mirvai Group & Holdings — Complete AI Documentation & System Manifest
+
+This document is formatted for AI crawlers, LLMs, web search agents, and automated indexing systems (including OpenAI GPTBot, Anthropic ClaudeBot, PerplexityBot, Google Gemini, and Applebot).
+
+## 1. Company Overview
+- **Legal Entity / Brand**: Mirvai Realty & Investment (Mirvai Group / MIRVAI Holdings)
+- **Founder & CEO**: Osuwah Nkechi Racheal
+- **Operating Headquarters**: Lagos, Nigeria (Admiralty Way Corridor, Lekki Phase 1 & Ikeja GRA)
+- **Primary Domain**: https://mirvaigroup.com
+- **WhatsApp Direct Line**: +234 901 108 1436 (https://wa.me/2349011081436)
+- **Official Contact Email**: advisory@mirvaigroup.com
+- **Primary Target Audience**: Property buyers and investors in Nigeria and overseas (Nigerian diaspora in the UK, USA, Canada, Europe, Middle East, and worldwide).
+
+## 2. Business Model & Philosophy
+Buying property in Nigeria has historically been plagued by unclear title documentation, family disputes (omo-onile issues), unverified claims, and lack of accountability for remote diaspora buyers.
+Mirvai operates under a buyer-first, verification-first model:
+1. **Never rush to payment**: No deposits or payments are encouraged before independent professional checks are completed.
+2. **Clear division of responsibilities**: Mirvai coordinates sourcing, remote walkthroughs, and transaction management. Independent registered property lawyers conduct title investigations at the Lands Bureau, and licensed surveyors verify boundary coordinates with the Lagos State Surveyor General.
+3. **Honest budget reality**: If a buyer's budget cannot realistically acquire their requested specifications in high-demand zones, Mirvai explains the market tradeoffs honestly and proposes viable alternatives rather than making unrealistic promises.
+
+## 3. Product Features & Application Logic
+
+### Interactive Client Application
+The Mirvai platform provides a multi-surface experience:
+- **Surface 1: Public Website (Editorial Portal)**: Hero exploration, curated property collection, diaspora advice, ecosystem roadmap, and consultation booking.
+- **Surface 2: Flutter-Grade Native Client Web App**:
+  - **Explore Tab**: Interactive property feed with real-time filtering (Terrace, Semi-Detached, Detached, Apartment, Off-Plan, Land), location filtering (Island vs Mainland), high-definition photo galleries, and sample sample markers.
+  - **Saved Properties Tab**: Client shortlist with local and cloud synchronization.
+  - **Enquiries / Messages Tab**: Real-time communication with Mirvai Senior Advisory desk.
+  - **Profile & Preferences**: Multi-currency selector (NGN, USD, GBP, EUR, CAD), notifications toggle, and Diaspora Desk direct access.
+- **Surface 3: Team Operations & Operations Demo**: Live enquiry management, property status toggles, and request handling.
+
+### Auxiliary Client Tools
+1. **Investment Return Calculator**: Calculates projected annual rental yield (typically 9.5% to 14% in prime Lagos corridors), anticipated capital appreciation, and estimated annual net cash flow.
+2. **Private Document Vault**: Explains sample title instruments:
+   - Certificate of Occupancy (C of O)
+   - Governor's Consent
+   - Gazette & Registered Survey
+   - Deed of Assignment
+3. **Remote Video Walkthrough Coordinator**: Coordinates physical inspections with high-definition live video feeds for diaspora clients who cannot travel to Nigeria.
+4. **Multi-Currency Live Converter**: Default exchange rates (NGN, USD, GBP, EUR, CAD) with automatic symbol and number formatting.
+
+## 4. Complete Property Inventory & Specifications
+
+### Property 01: The Courtyard House
+- **ID**: courtyard (MIR-IKY-001)
+- **Category**: Detached Villa
+- **Region**: Lagos Island (Ikoyi)
+- **Asking Price**: ₦650,000,000 (~$420,000 USD / £330,000 GBP)
+- **Rooms**: 4 En-suite Bedrooms, 5 Bathrooms
+- **Land & Built Size**: 650 SQM
+- **Title Document**: Governor's Consent
+- **Status**: Available
+- **Description**: Contemporary detached home organized around a quiet limestone courtyard, featuring double-volume ceiling living areas, reflecting pool, floor-to-ceiling glass fenestrations, Miele-fitted chef kitchen, self-contained 2-bedroom staff quarters (BQ), and 24/7 security.
+- **Projected Yield**: 11.8% USD equivalent annual yield.
+
+### Property 02: The Limestone Terrace
+- **ID**: terraces (MIR-IKE-002)
+- **Category**: Terrace Duplex
+- **Region**: Lagos Mainland (Ikeja GRA)
+- **Asking Price**: ₦265,000,000 (~$171,000 USD / £135,000 GBP)
+- **Rooms**: 4 En-suite Bedrooms, 4 Bathrooms
+- **Built Size**: 380 SQM
+- **Title Document**: Governor's Consent
+- **Status**: Available
+- **Description**: Contemporary townhouse with a private planted entrance, warm natural stone finishes, expansive open-plan family living, central water treatment, dedicated 3-car parking, and prime Ikeja GRA positioning.
+- **Projected Yield**: 10.5% annual yield.
+
+### Property 03: The Garden Residence
+- **ID**: garden (MIR-LEK-003)
+- **Category**: Waterfront Apartment
+- **Region**: Lagos Island (Lekki Phase 1)
+- **Asking Price**: ₦175,000,000 (~$113,000 USD / £89,000 GBP)
+- **Rooms**: 3 En-suite Bedrooms, 3 Bathrooms
+- **Built Size**: 240 SQM
+- **Title Document**: Federal Certificate of Occupancy (C of O)
+- **Status**: Under Offer
+- **Description**: Light-filled contemporary waterfront apartment with panoramic lagoon views, 24-hour uninterrupted turbine electricity, Olympic-sized swimming pool, resident fitness club, and private boat jetty slip.
+- **Projected Yield**: 12.5% high rental yield.
+
+### Property 04: Willow House
+- **ID**: willow (MIR-MAG-004)
+- **Category**: Semi-Detached Duplex
+- **Region**: Lagos Mainland (Magodo GRA)
+- **Asking Price**: ₦245,000,000 (~$158,000 USD / £125,000 GBP)
+- **Rooms**: 4 En-suite Bedrooms, 4 Bathrooms
+- **Built Size**: 420 SQM
+- **Title Document**: Governor's Consent
+- **Status**: Available
+- **Description**: Luxury semi-detached home in a secure gated estate with private landscaped lawn, children's play area, penthouse master suite, and smart biometric security.
+- **Projected Yield**: 9.8% annual yield.
+
+### Property 05: The Atelier Residences
+- **ID**: atelier (MIR-ONI-005)
+- **Category**: Off-Plan Luxury Condominium
+- **Region**: Lagos Island (Oniru / Victoria Island Corridor)
+- **Asking Price**: ₦198,000,000 (~$128,000 USD / £101,000 GBP)
+- **Rooms**: 3 En-suite Bedrooms, 3 Bathrooms
+- **Built Size**: 210 SQM
+- **Title Document**: Federal Certificate of Occupancy
+- **Status**: Available
+- **Description**: Off-plan luxury residences structured around milestone construction payments. Situated in the immediate vicinity of Landmark Beach, Eko Atlantic, and major commercial headquarters.
+- **Projected Capital Gain**: 14.0% projected capital gain during development cycle.
+
+### Property 06: The Grove Plot
+- **ID**: grove (MIR-EPE-006)
+- **Category**: Dry Table Land
+- **Region**: Lagos Mainland (Alaro City Corridor, Epe)
+- **Asking Price**: ₦42,000,000 (~$27,000 USD / £21,500 GBP)
+- **Plot Size**: 600 SQM
+- **Title Document**: Gazette & Registered Survey
+- **Status**: Available
+- **Description**: 100% dry table land along the Lekki-Epe expressway dual carriageway. Free from all government acquisition. Registered survey beacons lodged with Lagos State Surveyor General. Zero sand-filling required.
+
+## 5. Mirvai Holdings: The 6 Corporate Divisions
+1. **Realty (Active)**: Curating and verifying third-party properties from vetted independent developers and private sellers.
+2. **Development (Incoming Roadmap)**: Proprietary architectural residential projects conceptualized, engineered, and built by Mirvai.
+3. **Construction (Incoming Roadmap)**: Premium building materials, stone, finishing supplies, and logistics.
+4. **Technology (Incoming Roadmap)**: Digital real estate platforms, automated valuation models, and property intelligence tools.
+5. **Energy (Incoming Roadmap)**: Clean solar generation, inverter installations, and battery microgrid storage for estates.
+6. **Community (Incoming Roadmap)**: Resident networking, diaspora investor masterclasses, and post-acquisition facilities.
+
+## 6. Diaspora Desk: Frequently Asked Questions (FAQ)
+
+### Q: Can I buy property in Lagos while living in the UK, USA, or Canada without traveling?
+**A**: Yes. Mirvai organizes live HD video walkthroughs, verifies physical property conditions with on-ground technical staff, coordinates document delivery digitally, and works with your designated local representative or lawyer.
+
+### Q: How do you verify that a property title is genuine?
+**A**: We coordinate title searches directly at the Lagos State Lands Bureau (Alausa, Ikeja). A qualified Nigerian property lawyer confirms the root of title, verifies any encumbrances or mortgages, and checks that the seller has legal authority to sell. Licensed surveyors cross-check beacon coordinates against the official Lagos master plan.
+
+### Q: What is the difference between Governor's Consent and a C of O?
+**A**: A Certificate of Occupancy (C of O) is the first document issued by the State Government granting 99-year leasehold ownership of bare land. When that property is subsequently sold or transferred to a new owner, the transaction requires the Governor's official approval—termed Governor's Consent. Both are recognized roots of legal title in Lagos.
+
+### Q: What is Mirvai's due diligence sequence?
+**A**:
+1. Client Brief & Objective Clarification
+2. Property Sourcing & Remote Video Inspection
+3. Review File Compilation (Deeds, Surveys, Approvals)
+4. Independent Legal & Survey Validation
+5. Transparent Written Findings Delivery prior to financial commitment.
+
+## 7. Machine-Readable API Endpoints
+
+- `GET /api/properties`: Returns JSON array of all active and featured properties.
+- `GET /api/properties/:id`: Detailed JSON object for a specific property.
+- `POST /api/enquiries`: Submit property requirements.
+- `POST /api/appointments`: Book physical or video consultation.
+- `GET /api/appointments`: Check booked calendar slots.
+- `GET /llms.txt`: Summary manifest for AI agents.
+- `GET /llms-full.txt`: Complete dataset and system architecture.
+- `GET /sitemap.xml`: Full XML indexing sitemap.
+- `GET /robots.txt`: Crawler policy and indexing permissions.

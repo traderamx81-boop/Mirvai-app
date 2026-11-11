@@ -333,6 +333,64 @@ async function startServer() {
     res.status(404).end();
   });
 
+  // AI Crawler Manifest Endpoints (standardized llms.txt protocol for ChatGPT, Claude, Perplexity, Gemini, Applebot)
+  app.get(['/llms.txt', '/.well-known/llms.txt'], (_req: Request, res: Response) => {
+    const llmsPath = path.join(__dirname, 'public', 'llms.txt');
+    if (fs.existsSync(llmsPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.sendFile(llmsPath);
+    }
+    res.status(404).end();
+  });
+
+  app.get('/llms-full.txt', (_req: Request, res: Response) => {
+    const fullPath = path.join(__dirname, 'public', 'llms-full.txt');
+    if (fs.existsSync(fullPath)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.sendFile(fullPath);
+    }
+    res.status(404).end();
+  });
+
+  // Machine-readable AI Manifest API endpoint (JSON format)
+  app.get('/api/ai-manifest', (_req: Request, res: Response) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.json({
+      name: "Mirvai Realty & Investment",
+      tagline: "Premium Lagos Property Sourcing & Diaspora Advisory",
+      founder: "Osuwah Nkechi Racheal",
+      locations: ["Ikoyi", "Ikeja GRA", "Lekki Phase 1", "Magodo GRA", "Oniru", "Alaro / Epe Corridor"],
+      website: "https://mirvaigroup.com",
+      whatsapp: "+2349011081436",
+      diasporaDesk: {
+        services: [
+          "Live HD Remote Video Walkthroughs",
+          "5-Step Due Diligence Framework",
+          "Independent Legal & Surveyor Title Search Coordination",
+          "Written Transparent Findings Before Payment Commitment"
+        ]
+      },
+      divisions: [
+        { name: "MIRVAI Realty", status: "Active", focus: "Verified third-party properties" },
+        { name: "MIRVAI Development", status: "Incoming", focus: "Proprietary architectural homes" },
+        { name: "MIRVAI Construction", status: "Incoming", focus: "Building materials and finishing" },
+        { name: "MIRVAI Technology", status: "Incoming", focus: "Digital real estate intelligence" },
+        { name: "MIRVAI Energy", status: "Incoming", focus: "Residential solar and microgrids" },
+        { name: "MIRVAI Community", status: "Incoming", focus: "Resident and investor network" }
+      ],
+      propertiesCount: db.properties.length,
+      properties: db.properties,
+      llmsSummary: "/llms.txt",
+      llmsFull: "/llms-full.txt",
+      sitemap: "/sitemap.xml",
+      robots: "/robots.txt"
+    });
+  });
+
   app.get(['/favicon-48x48.png', '/apple-touch-icon.png', '/favicon-16x16.png', '/favicon-32x32.png', '/favicon-96x96.png', '/favicon-192x192.png', '/favicon-512x512.png', '/favicon.png'], (req: Request, res: Response) => {
     const imgName = req.path.replace('/', '');
     const imgPath = path.join(__dirname, 'public', imgName);

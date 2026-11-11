@@ -1,0 +1,38 @@
+# Mirvai Group & Realty Holdings
+
+> Mirvai is a premier real estate sourcing and investment advisory firm in Lagos, Nigeria, founded by Osuwah Nkechi Racheal. We specialize in verified residential, commercial, off-plan, and land acquisitions for clients across Nigeria and the global diaspora (United Kingdom, United States, Canada, Europe).
+
+## Core Capabilities & Services
+
+- **The Lagos Collection**: Curated luxury properties across Lagos Island (Ikoyi, Lekki Phase 1, Victoria Island, Oniru) and Lagos Mainland (Ikeja GRA, Magodo GRA, Alaro / Epe Corridor).
+- **The Diaspora Desk**: Complete remote buyer representation, live HD video walkthroughs, and end-to-end guidance from search to handover.
+- **5-Step Due Diligence Framework**: 1) Understand brief; 2) Source & inspect; 3) Assemble review file; 4) Coordinate specialist legal (lawyer) & boundary (licensed surveyor) review; 5) Present transparent findings before any payment commitment.
+- **Interactive Client App**: Explore property listings, save favorites, run investment ROI calculations, request video inspections, and consult via real-time advisory chat.
+- **Multi-Currency Pricing**: Live conversions between Nigerian Naira (NGN ₦), US Dollar (USD $), British Pound (GBP £), Euro (EUR €), and Canadian Dollar (CAD $).
+
+## Key Active Properties (Sample Portfolio)
+
+- **The Courtyard House** (Ikoyi, Lagos Island) — Detached Villa, 4 beds, 5 baths, 650 sqm. Price: ₦650,000,000. Title: Governor's Consent. Features: limestone courtyard, reflecting pool, Miele chef kitchen, 2-bed BQ.
+- **The Limestone Terrace** (Ikeja GRA, Lagos Mainland) — Terrace Duplex, 4 beds, 4 baths, 380 sqm. Price: ₦265,000,000. Title: Governor's Consent. Features: private planted entrance, open-plan family lounge, central water filtration.
+- **The Garden Residence** (Lekki Phase 1, Lagos Island) — Luxury Waterfront Apartment, 3 beds, 3 baths, 240 sqm. Price: ₦175,000,000. Title: Federal Certificate of Occupancy (C of O). Features: lagoon views, 24/7 turbine electricity, gym, private boat slip.
+- **Willow House** (Magodo GRA, Lagos Mainland) — Semi-Detached Duplex, 4 beds, 4 baths, 420 sqm. Price: ₦245,000,000. Title: Governor's Consent. Features: gated estate, private lawn, penthouse master suite.
+- **The Atelier Residences** (Oniru / Victoria Island, Lagos Island) — Off-Plan Luxury Condos, 3 beds, 3 baths, 210 sqm. Price: ₦198,000,000. Title: Federal C of O. Features: milestone construction payments, ocean breeze terraces.
+- **The Grove Plot** (Alaro City Corridor, Epe, Lagos Mainland) — Table Land, 600 sqm. Price: ₦42,000,000. Title: Gazette & Registered Survey. Features: 100% dry land, zero sand-filling, direct expressway access.
+
+## The MIRVAI Ecosystem (6 Divisions)
+
+1. **MIRVAI Realty** (Active): Sourcing and sales of verified homes and land from independent developers.
+2. **MIRVAI Development** (Incoming): Proprietary architectural developments and communities built directly by MIRVAI.
+3. **MIRVAI Construction** (Incoming): Sourcing, sales, and supply of premium building materials.
+4. **MIRVAI Technology** (Incoming): Digital property intelligence tools and client management platforms.
+5. **MIRVAI Energy** (Incoming): Clean solar generation and storage systems for modern homes.
+6. **MIRVAI Community** (Incoming): Buyer networks, community programming, and post-move resident resources.
+
+## Contact & Direct Channels
+
+- **Website**: https://mirvaigroup.com
+- **WhatsApp**: +234 901 108 1436 (wa.me/2349011081436)
+- **Email**: advisory@mirvaigroup.com
+- **Office**: Admiralty Way Corridor, Lekki Phase 1 / Ikeja, Lagos, Nigeria
+- **Full AI Documentation**: https://mirvaigroup.com/llms-full.txt
+- **Sitemap**: https://mirvaigroup.com/sitemap.xml
