@@ -35,7 +35,7 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
       <div className="workspace-inner team-layout">
         <header className="section-intro">
           <div>
-            <p className="eyebrow">MIRVAI REALTY / OPERATIONS DEMO</p>
+            <p className="eyebrow">MIRVAI / OPERATIONS DEMO</p>
             <h1>Team view.</h1>
           </div>
           <p>

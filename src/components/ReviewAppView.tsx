@@ -136,9 +136,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                 <use href="#i-menu" />
               </svg>
             </button>
-            <div className="wordmark">
-              MIRVAI <small>REALTY</small>
-            </div>
+            <div className="wordmark">MIRVAI</div>
             <button
               type="button"
               className="icon-button"

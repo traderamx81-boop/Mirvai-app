@@ -201,7 +201,7 @@ export const createReviewRequest = (
 ): ReviewRequest => ({
   id: id || globalThis.crypto?.randomUUID?.() || Date.now().toString(36),
   kind: kind === 'viewing' ? 'Viewing' : 'Enquiry',
-  title: homeById(propertyId)?.name || 'MIRVAI Realty',
+  title: homeById(propertyId)?.name || 'MIRVAI',
   summary,
   reviewed: false,
 });

@@ -47,6 +47,9 @@ test('createReviewRequest & markRequestAsReviewed update state accurately', () =
 
   const updated = markRequestAsReviewed([req], 'r-1');
   assert.equal(updated[0].reviewed, true);
+
+  const generalReq = createReviewRequest('enquire', 'Lagos Island · Detached', undefined, 'r-2');
+  assert.equal(generalReq.title, 'MIRVAI');
 });
 
 test('resolveViewFromPath and pathForView map page routes accurately', () => {

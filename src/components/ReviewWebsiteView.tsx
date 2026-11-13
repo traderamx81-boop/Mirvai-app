@@ -49,8 +49,8 @@ export const ReviewWebsiteView: React.FC<ReviewWebsiteViewProps> = ({
           <span>Menu</span>
         </button>
 
-        <a className="wordmark" href="#top" aria-label="MIRVAI Realty home">
-          MIRVAI <small>REALTY</small>
+        <a className="wordmark" href="#top" aria-label="MIRVAI home">
+          MIRVAI
         </a>
 
         <button
@@ -73,17 +73,13 @@ export const ReviewWebsiteView: React.FC<ReviewWebsiteViewProps> = ({
           height={680}
           fetchPriority="high"
         />
-        <figcaption>
-          <span>01 / THE COURTYARD</span>
-          <span>LAGOS, NIGERIA</span>
-        </figcaption>
       </figure>
 
       <section className="light section collection" id="properties">
         <div className="section-inner">
           <div className="section-intro">
             <div>
-              <p className="eyebrow">01 / MIRVAI REALTY</p>
+              <p className="eyebrow">01 / MIRVAI</p>
               <h1>The Lagos Collection.</h1>
             </div>
             <p>
@@ -187,9 +183,7 @@ export const ReviewWebsiteView: React.FC<ReviewWebsiteViewProps> = ({
 
       <footer className="site-foot" id="contact">
         <div>
-          <div className="wordmark">
-            MIRVAI <small>REALTY</small>
-          </div>
+          <div className="wordmark">MIRVAI</div>
           <p>Find. Own. Grow.</p>
         </div>
         <div className="actions">
