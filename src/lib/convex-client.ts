@@ -5,8 +5,10 @@ import { api } from '../../convex/_generated/api';
 export { api };
 
 // Convex Deployment URLs provided by user
-export const CONVEX_URL = import.meta.env.VITE_CONVEX_URL || 'https://secret-deer-42.eu-west-1.convex.cloud';
-export const CONVEX_SITE_URL = import.meta.env.VITE_CONVEX_SITE_URL || 'https://secret-deer-42.eu-west-1.convex.site';
+export const CONVEX_URL =
+  import.meta.env?.VITE_CONVEX_URL || 'https://secret-deer-42.eu-west-1.convex.cloud';
+export const CONVEX_SITE_URL =
+  import.meta.env?.VITE_CONVEX_SITE_URL || 'https://secret-deer-42.eu-west-1.convex.site';
 
 // Instantiate Convex React Client instance
 export const convexClient = new ConvexReactClient(CONVEX_URL);

@@ -9,7 +9,7 @@ export const list = query({
     type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let properties = await ctx.db.query("properties").collect();
+    let properties = await ctx.db.query("properties").order("desc").collect();
     if (!args.includeDrafts) {
       properties = properties.filter((p) => !p.isDraft);
     }
@@ -33,6 +33,7 @@ export const getById = query({
 // Mutations
 export const add = mutation({
   args: {
+    slug: v.optional(v.string()),
     name: v.string(),
     type: v.string(),
     area: v.string(),
@@ -50,13 +51,122 @@ export const add = mutation({
     features: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const slug = args.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const slug =
+      args.slug ||
+      args.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") ||
+      `listing-${Date.now()}`;
+    const existing = await ctx.db
+      .query("properties")
+      .withIndex("by_slug", (q) => q.eq("slug", slug))
+      .first();
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        ...args,
+        slug,
+      });
+      return existing._id;
+    }
     const propertyId = await ctx.db.insert("properties", {
       ...args,
       slug,
       createdAt: new Date().toISOString(),
     });
     return propertyId;
+  },
+});
+
+export const upsert = mutation({
+  args: {
+    slug: v.string(),
+    name: v.string(),
+    type: v.string(),
+    area: v.string(),
+    locale: v.string(),
+    price: v.number(),
+    beds: v.optional(v.number()),
+    photo: v.optional(v.string()),
+    photoUrl: v.optional(v.string()),
+    description: v.string(),
+    status: v.string(),
+    isDraft: v.boolean(),
+    features: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("properties")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        name: args.name,
+        type: args.type,
+        area: args.area,
+        locale: args.locale,
+        price: args.price,
+        beds: args.beds,
+        photo: args.photo,
+        photoUrl: args.photoUrl,
+        description: args.description,
+        status: args.status,
+        isDraft: args.isDraft,
+        features: args.features ?? existing.features,
+      });
+      return existing._id;
+    }
+
+    return await ctx.db.insert("properties", {
+      slug: args.slug,
+      name: args.name,
+      type: args.type,
+      area: args.area,
+      locale: args.locale,
+      price: args.price,
+      beds: args.beds,
+      photo: args.photo,
+      photoUrl: args.photoUrl,
+      description: args.description,
+      status: args.status,
+      isDraft: args.isDraft,
+      features: args.features ?? [],
+      createdAt: new Date().toISOString(),
+    });
+  },
+});
+
+export const seedDefaults = mutation({
+  args: {
+    items: v.array(
+      v.object({
+        slug: v.string(),
+        name: v.string(),
+        type: v.string(),
+        area: v.string(),
+        locale: v.string(),
+        price: v.number(),
+        beds: v.optional(v.number()),
+        photo: v.optional(v.string()),
+        photoUrl: v.optional(v.string()),
+        description: v.string(),
+        status: v.string(),
+        isDraft: v.boolean(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db.query("properties").collect();
+    if (existing.length > 0) {
+      return { seeded: 0 };
+    }
+    const now = new Date().toISOString();
+    for (const item of args.items) {
+      await ctx.db.insert("properties", {
+        ...item,
+        features: [],
+        createdAt: now,
+      });
+    }
+    return { seeded: args.items.length };
   },
 });
 
@@ -90,5 +200,32 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     await ctx.db.delete(args.id);
     return true;
+  },
+});
+
+export const removeBySlugOrId = mutation({
+  args: {
+    id: v.optional(v.id("properties")),
+    slug: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (args.id) {
+      const doc = await ctx.db.get(args.id);
+      if (doc) {
+        await ctx.db.delete(args.id);
+        return true;
+      }
+    }
+    if (args.slug) {
+      const bySlug = await ctx.db
+        .query("properties")
+        .withIndex("by_slug", (q) => q.eq("slug", args.slug!))
+        .first();
+      if (bySlug) {
+        await ctx.db.delete(bySlug._id);
+        return true;
+      }
+    }
+    return false;
   },
 });

@@ -18,7 +18,7 @@ import {
   upsertListing,
 } from './lib/courtyardReview';
 import {
-  fetchConvexSnapshot,
+  subscribeToConvexRealtime,
   syncEnquiryCreate,
   syncEnquiryReview,
   syncListingCreateOrUpdate,
@@ -70,7 +70,7 @@ export function App() {
     portraitRef.current = portraitUrl;
   }, [portraitUrl]);
 
-  // Cross-tab realtime sync + popstate routing + graceful Convex hydration
+  // Cross-tab realtime sync + popstate routing + live Convex WebSocket subscription
   useEffect(() => {
     let mounted = true;
 
@@ -102,18 +102,27 @@ export function App() {
     window.addEventListener('popstate', onPopState);
     window.addEventListener('hashchange', onPopState);
 
-    void fetchConvexSnapshot().then((snapshot) => {
-      if (!mounted || !snapshot) return;
-      setState((prev) => ({
-        ...prev,
-        listings: snapshot.listings && snapshot.listings.length > 0 ? snapshot.listings : prev.listings,
-        drafts: snapshot.drafts ?? prev.drafts,
-        requests: snapshot.requests && snapshot.requests.length > 0 ? snapshot.requests : prev.requests,
-      }));
+    const stopConvex = subscribeToConvexRealtime({
+      onProperties: (listings, drafts) => {
+        if (!mounted) return;
+        setState((prev) => ({
+          ...prev,
+          listings: listings.length > 0 ? listings : prev.listings,
+          drafts,
+        }));
+      },
+      onRequests: (requests) => {
+        if (!mounted) return;
+        setState((prev) => ({
+          ...prev,
+          requests: requests.length > 0 ? requests : prev.requests,
+        }));
+      },
     });
 
     return () => {
       mounted = false;
+      stopConvex();
       channelRef.current?.close();
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('popstate', onPopState);

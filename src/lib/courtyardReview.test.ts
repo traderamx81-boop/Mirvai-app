@@ -137,3 +137,56 @@ test('buildWhatsAppUrl and resolveListingImage format cleanly', () => {
   });
   assert.equal(resolvedCustom?.src, 'https://example.com/villa.jpg');
 });
+
+test('mapConvexProperties and mapConvexRequests convert Convex rows accurately', async () => {
+  const { mapConvexProperties, mapConvexRequests } = await import('./convexSync');
+
+  const props = mapConvexProperties([
+    {
+      _id: 'jx7123',
+      slug: 'courtyard',
+      name: 'The Courtyard House',
+      type: 'detached',
+      area: 'Island',
+      locale: 'Ikoyi',
+      price: 650000000,
+      beds: 5,
+      status: 'Available',
+      photo: 'courtyard',
+      description: 'Courtyard home',
+      isDraft: true,
+    },
+  ]);
+
+  assert.equal(props.listings.length, 1);
+  assert.equal(props.listings[0].id, 'courtyard');
+  assert.equal(props.listings[0].convexId, 'jx7123');
+  assert.deepEqual(props.drafts, ['courtyard']);
+
+  const reqs = mapConvexRequests([
+    {
+      _id: 'jr999',
+      externalId: 'req-42',
+      kind: 'Enquiry',
+      title: 'MIRVAI',
+      summary: 'Location: Lekki Phase 1',
+      location: 'Lekki Phase 1',
+      timeline: 'Within 1 month',
+      propertyType: 'Not sure yet',
+      budget: '₦250M – ₦500M',
+      clientName: 'Chidi',
+      clientContact: '+2348011122233',
+      basedIn: 'Lagos / Nigeria',
+      notes: 'Need C of O.',
+      reviewed: false,
+      timestamp: '2026-11-13T12:00:00.000Z',
+    },
+  ]);
+
+  assert.equal(reqs.length, 1);
+  assert.equal(reqs[0].id, 'req-42');
+  assert.equal(reqs[0].convexId, 'jr999');
+  assert.equal(reqs[0].location, 'Lekki Phase 1');
+  assert.equal(reqs[0].timeline, 'Within 1 month');
+});
+

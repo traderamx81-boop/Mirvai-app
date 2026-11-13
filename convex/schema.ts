@@ -22,21 +22,31 @@ export default defineSchema({
     features: v.array(v.string()),
     createdAt: v.string(),
   })
+    .index("by_slug", ["slug"])
     .index("by_type", ["type"])
     .index("by_area", ["area"])
     .index("by_status", ["status"]),
 
   requests: defineTable({
-    kind: v.string(), // Viewing, Property brief, Listing enquiry, Enquiry
+    externalId: v.optional(v.string()),
+    kind: v.string(), // Viewing, Enquiry
     title: v.string(),
     summary: v.string(),
+    location: v.optional(v.string()),
+    timeline: v.optional(v.string()),
+    propertyType: v.optional(v.string()),
+    budget: v.optional(v.string()),
     clientName: v.optional(v.string()),
     clientContact: v.optional(v.string()),
+    basedIn: v.optional(v.string()),
+    notes: v.optional(v.string()),
     propertyId: v.optional(v.string()),
     reviewed: v.boolean(),
     teamNotes: v.optional(v.string()),
     timestamp: v.string(),
-  }).index("by_reviewed", ["reviewed"]),
+  })
+    .index("by_reviewed", ["reviewed"])
+    .index("by_externalId", ["externalId"]),
 
   settings: defineTable({
     key: v.string(),
@@ -44,7 +54,7 @@ export default defineSchema({
     showAnnouncement: v.boolean(),
     heroHeadlineMain: v.string(),
     heroHeadlineEm: v.string(),
-    heroCopy: stringValidation(),
+    heroCopy: v.string(),
     whatsappPhone: v.string(),
     conciergeEmail: v.string(),
     officeLocation: v.string(),
@@ -52,7 +62,3 @@ export default defineSchema({
     gbpRate: v.number(),
   }).index("by_key", ["key"]),
 });
-
-function stringValidation() {
-  return v.string();
-}
