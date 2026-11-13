@@ -10,7 +10,8 @@ import {
   HomeListing,
   LAGOS_LOCATION_SUGGESTIONS,
   ngn,
-  resolveListingImage,
+  parseVideoEmbed,
+  resolveListingGallery,
   TIMELINE_OPTIONS,
   WHATSAPP_DISPLAY,
 } from '../lib/courtyardReview';
@@ -72,6 +73,7 @@ export const ReviewDialogs: React.FC<ReviewDialogsProps> = ({
   const [enqBasedIn, setEnqBasedIn] = useState<string>(BASED_IN_OPTIONS[0]);
   const [enqNotes, setEnqNotes] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [activeMediaIdx, setActiveMediaIdx] = useState(0);
 
   useEffect(() => {
     const drawer = drawerRef.current;
@@ -87,6 +89,9 @@ export const ReviewDialogs: React.FC<ReviewDialogsProps> = ({
     const modal = modalRef.current;
     if (!modal) return;
     if (activeModal) {
+      if (activeModal.type === 'property') {
+        setActiveMediaIdx(0);
+      }
       if (activeModal.type === 'form') {
         const item = homeById(activeModal.id, listings);
         setEnqLocation(item ? `${item.locale}, Lagos ${item.area}` : '');
@@ -154,7 +159,24 @@ export const ReviewDialogs: React.FC<ReviewDialogsProps> = ({
       const item = homeById(activeModal.id, listings);
       if (!item) return null;
       const isSaved = savedIds.includes(item.id);
-      const art = resolveListingImage(item);
+      const gallery = resolveListingGallery(item);
+      const video = parseVideoEmbed(item.videoUrl);
+      const slides: Array<
+        | { kind: 'image'; src: string; alt: string }
+        | { kind: 'video'; src: string; mode: 'video' | 'embed'; poster?: string }
+      > = gallery.map((img) => ({ kind: 'image', src: img.src, alt: img.alt }));
+
+      if (video) {
+        slides.push({
+          kind: 'video',
+          src: video.src,
+          mode: video.kind,
+          poster: gallery[0]?.src,
+        });
+      }
+
+      const safeIdx = slides.length > 0 ? Math.min(activeMediaIdx, slides.length - 1) : 0;
+      const currentSlide = slides[safeIdx];
 
       return (
         <>
@@ -162,15 +184,100 @@ export const ReviewDialogs: React.FC<ReviewDialogsProps> = ({
           <p className="eyebrow">
             {categoryLabel(item.type)} / {item.locale} · Lagos {item.area}
           </p>
-          {art && (
-            <img
-              className="property-photo"
-              src={art.src}
-              alt={art.alt}
-              width={1050}
-              height={700}
-            />
+
+          {slides.length > 0 && currentSlide && (
+            <div className="property-media">
+              <div className="media-stage">
+                {currentSlide.kind === 'image' ? (
+                  <img
+                    className="property-photo"
+                    src={currentSlide.src}
+                    alt={currentSlide.alt}
+                    width={1050}
+                    height={700}
+                  />
+                ) : currentSlide.mode === 'embed' ? (
+                  <iframe
+                    className="property-video-frame"
+                    src={currentSlide.src}
+                    title={`${item.name} video walkthrough`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    key={currentSlide.src}
+                    className="property-video"
+                    src={currentSlide.src}
+                    poster={currentSlide.poster}
+                    controls
+                    playsInline
+                    preload="metadata"
+                  />
+                )}
+
+                {slides.length > 1 && (
+                  <div className="media-bar">
+                    <span className="media-counter">
+                      {currentSlide.kind === 'video'
+                        ? 'Video walkthrough'
+                        : `Photo ${safeIdx + 1} of ${gallery.length}`}
+                    </span>
+                    <div className="media-nav-buttons">
+                      <button
+                        type="button"
+                        className="media-nav-btn"
+                        aria-label="Previous media"
+                        onClick={() =>
+                          setActiveMediaIdx((safeIdx - 1 + slides.length) % slides.length)
+                        }
+                      >
+                        ←
+                      </button>
+                      <button
+                        type="button"
+                        className="media-nav-btn"
+                        aria-label="Next media"
+                        onClick={() => setActiveMediaIdx((safeIdx + 1) % slides.length)}
+                      >
+                        →
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {slides.length > 1 && (
+                <div className="media-thumbs" role="tablist" aria-label="Property gallery">
+                  {slides.map((slide, idx) => (
+                    <button
+                      key={`${slide.kind}-${slide.src}-${idx}`}
+                      type="button"
+                      role="tab"
+                      aria-selected={safeIdx === idx}
+                      className={`media-thumb ${safeIdx === idx ? 'is-active' : ''}`}
+                      onClick={() => setActiveMediaIdx(idx)}
+                      aria-label={
+                        slide.kind === 'video'
+                          ? 'Play property video'
+                          : `Show photo ${idx + 1}`
+                      }
+                    >
+                      {slide.kind === 'image' ? (
+                        <img src={slide.src} alt="" loading="lazy" />
+                      ) : (
+                        <span className="media-thumb-video">
+                          <span aria-hidden="true">▶</span>
+                          <small>Video</small>
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
+
           <p>
             <strong>{ngn(item.price)}</strong> · {item.status || 'Available'}
             {item.beds ? ` · ${item.beds} bedrooms` : ''}

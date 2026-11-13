@@ -15,6 +15,8 @@ export default defineSchema({
     sqm: v.optional(v.number()),
     photo: v.optional(v.string()),
     photoUrl: v.optional(v.string()),
+    images: v.optional(v.array(v.string())),
+    videoUrl: v.optional(v.string()),
     description: v.string(),
     status: v.string(), // Available, Under Offer, Sold
     isDraft: v.boolean(),

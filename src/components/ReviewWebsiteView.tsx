@@ -4,6 +4,8 @@ import {
   categoryLabel,
   HomeListing,
   ngn,
+  parseVideoEmbed,
+  resolveListingGallery,
   resolveListingImage,
 } from '../lib/courtyardReview';
 
@@ -161,6 +163,8 @@ export const ReviewWebsiteView: React.FC<ReviewWebsiteViewProps> = ({
             ) : (
               listings.map((item) => {
                 const art = resolveListingImage(item);
+                const photoCount = resolveListingGallery(item).length;
+                const hasVideo = Boolean(parseVideoEmbed(item.videoUrl));
                 const isExpanded = Boolean(expandedIds[item.id]);
                 const badgeLabel = item.status && item.status !== 'Available' ? item.status : 'Sample';
 
@@ -220,6 +224,8 @@ export const ReviewWebsiteView: React.FC<ReviewWebsiteViewProps> = ({
                           <span>
                             {item.beds ? `${item.beds} bedrooms · ` : ''}
                             {item.status || 'Available'}
+                            {photoCount > 1 ? ` · ${photoCount} photos` : ''}
+                            {hasVideo ? ' · Video' : ''}
                           </span>
                           <button
                             type="button"

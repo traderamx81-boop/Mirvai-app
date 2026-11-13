@@ -80,6 +80,8 @@ export interface HomeListing {
   status?: string;
   photo?: string;
   photoUrl?: string;
+  images?: string[];
+  videoUrl?: string;
   description: string;
 }
 
@@ -160,6 +162,12 @@ export const defaultHomes: readonly HomeListing[] = [
     beds: 4,
     status: 'Available',
     photo: 'courtyard',
+    images: [
+      '/assets/courtyard.webp',
+      '/properties/adeniyi-jones-terrace/02-living-area.jpg',
+      '/properties/adeniyi-jones-terrace/03-kitchen-view.jpg',
+      '/properties/adeniyi-jones-terrace/09-bedroom.jpg',
+    ],
     description:
       'A contemporary detached home organised around a quiet courtyard, with generous living areas, double-height reception, chef kitchen, and an indoor-outdoor outlook.',
   },
@@ -173,6 +181,12 @@ export const defaultHomes: readonly HomeListing[] = [
     beds: 4,
     status: 'Available',
     photo: 'terraces',
+    images: [
+      '/assets/terraces.webp',
+      '/properties/adeniyi-jones-terrace/07-kitchen.jpg',
+      '/properties/adeniyi-jones-terrace/08-staircase.jpg',
+      '/properties/adeniyi-jones-terrace/04-bathroom.jpg',
+    ],
     description:
       'A terrace duplex with a planted entrance, warm natural stone finishes, all en-suite bedrooms, and generous space for everyday family life in Ikeja.',
   },
@@ -186,6 +200,11 @@ export const defaultHomes: readonly HomeListing[] = [
     beds: 3,
     status: 'Available',
     photo: 'garden',
+    images: [
+      '/assets/garden.webp',
+      '/properties/adeniyi-jones-terrace/05-landing.jpg',
+      '/properties/adeniyi-jones-terrace/06-bathtub.jpg',
+    ],
     description:
       'A light-filled three-bedroom apartment in Lekki with welcoming entertaining spaces, floor-to-ceiling openings, 24-hour power, and space to unwind.',
   },
@@ -199,6 +218,11 @@ export const defaultHomes: readonly HomeListing[] = [
     beds: 4,
     status: 'Available',
     photo: 'willow',
+    images: [
+      '/properties/adeniyi-jones-terrace/01-exterior.jpg',
+      '/properties/adeniyi-jones-terrace/02-living-area.jpg',
+      '/properties/adeniyi-jones-terrace/10-shower.jpg',
+    ],
     description:
       'A semi-detached home in Magodo with four en-suite bedrooms, private compound parking, fitted modern kitchen, and a layout suited to family living.',
   },
@@ -212,6 +236,10 @@ export const defaultHomes: readonly HomeListing[] = [
     beds: 3,
     status: 'Available',
     photo: 'atelier',
+    images: [
+      '/properties/adeniyi-jones-terrace/02-living-area.jpg',
+      '/properties/adeniyi-jones-terrace/03-kitchen-view.jpg',
+    ],
     description:
       'A contemporary off-plan residence in Oniru with milestone payment schedules, clean architectural proportions, and direct Victoria Island access.',
   },
@@ -224,6 +252,7 @@ export const defaultHomes: readonly HomeListing[] = [
     price: 42000000,
     status: 'Available',
     photo: 'grove',
+    images: ['/assets/grove.jpg'],
     description:
       'Dry cleared residential land plot ready for verification of survey coordinates, registered title documentation, and immediate perimeter development.',
   },
@@ -232,24 +261,101 @@ export const defaultHomes: readonly HomeListing[] = [
 // Alias kept for backwards compatibility
 export const homes = defaultHomes;
 
-export const resolveListingImage = (
-  item: Pick<HomeListing, 'name' | 'photo' | 'photoUrl'>
+const resolveSingleImageSource = (
+  value: string | undefined,
+  altFallback: string
 ): { src: string; alt: string } | null => {
-  if (item.photoUrl && item.photoUrl.trim()) {
-    return { src: item.photoUrl.trim(), alt: item.name };
-  }
-  if (item.photo && stockImages[item.photo]) {
-    return stockImages[item.photo];
-  }
+  const clean = value?.trim();
+  if (!clean) return null;
+  if (stockImages[clean]) return stockImages[clean];
   if (
-    item.photo &&
-    (item.photo.startsWith('/') ||
-      item.photo.startsWith('http://') ||
-      item.photo.startsWith('https://') ||
-      item.photo.startsWith('data:'))
+    clean.startsWith('/') ||
+    clean.startsWith('http://') ||
+    clean.startsWith('https://') ||
+    clean.startsWith('data:') ||
+    clean.startsWith('blob:')
   ) {
-    return { src: item.photo, alt: item.name };
+    return { src: clean, alt: altFallback };
   }
+  return null;
+};
+
+export const resolveListingGallery = (
+  item: Pick<HomeListing, 'name' | 'photo' | 'photoUrl' | 'images'>
+): { src: string; alt: string }[] => {
+  const result: { src: string; alt: string }[] = [];
+  const seen = new Set<string>();
+
+  const pushUnique = (entry: { src: string; alt: string } | null) => {
+    if (!entry || seen.has(entry.src)) return;
+    seen.add(entry.src);
+    result.push(entry);
+  };
+
+  pushUnique(resolveSingleImageSource(item.photoUrl, item.name));
+
+  if (Array.isArray(item.images)) {
+    item.images.forEach((img, idx) => {
+      pushUnique(
+        resolveSingleImageSource(
+          img,
+          idx === 0 ? item.name : `${item.name} — view ${idx + 1}`
+        )
+      );
+    });
+  }
+
+  if (result.length === 0) {
+    pushUnique(resolveSingleImageSource(item.photo, item.name));
+  }
+
+  return result;
+};
+
+export const resolveListingImage = (
+  item: Pick<HomeListing, 'name' | 'photo' | 'photoUrl' | 'images'>
+): { src: string; alt: string } | null => {
+  const gallery = resolveListingGallery(item);
+  return gallery[0] || null;
+};
+
+export type ParsedVideo =
+  | { kind: 'embed'; src: string }
+  | { kind: 'video'; src: string }
+  | null;
+
+export const parseVideoEmbed = (rawUrl?: string): ParsedVideo => {
+  const url = rawUrl?.trim();
+  if (!url) return null;
+
+  const ytMatch = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/
+  );
+  if (ytMatch?.[1]) {
+    return {
+      kind: 'embed',
+      src: `https://www.youtube.com/embed/${ytMatch[1]}?rel=0`,
+    };
+  }
+
+  const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeoMatch?.[1]) {
+    return {
+      kind: 'embed',
+      src: `https://player.vimeo.com/video/${vimeoMatch[1]}`,
+    };
+  }
+
+  if (
+    url.startsWith('/') ||
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:video/') ||
+    url.startsWith('blob:')
+  ) {
+    return { kind: 'video', src: url };
+  }
+
   return null;
 };
 
@@ -310,7 +416,11 @@ export const loadReviewState = (): ReviewState => {
     if (!raw) return base;
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed.listings) && parsed.listings.length > 0) {
-      base.listings = parsed.listings;
+      base.listings = parsed.listings.map((item: HomeListing) => {
+        if (item.images !== undefined || item.photoUrl) return item;
+        const fallback = defaultHomes.find((d) => d.id === item.id);
+        return fallback?.images ? { ...item, images: [...fallback.images] } : item;
+      });
     }
     if (Array.isArray(parsed.saved)) base.saved = parsed.saved;
     if (Array.isArray(parsed.requests)) base.requests = parsed.requests;

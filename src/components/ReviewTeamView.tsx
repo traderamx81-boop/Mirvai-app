@@ -4,11 +4,13 @@ import {
   categoryLabel,
   HomeListing,
   ngn,
+  parseVideoEmbed,
+  resolveListingGallery,
   resolveListingImage,
   ReviewRequest,
   STATUS_OPTIONS,
 } from '../lib/courtyardReview';
-import { uploadImageAsset } from '../lib/convexSync';
+import { uploadMediaFile } from '../lib/convexSync';
 
 interface ReviewTeamViewProps {
   hidden: boolean;
@@ -34,8 +36,8 @@ interface EditorFormState {
   price: string;
   beds: string;
   status: string;
-  photoUrl: string;
-  photoKey: string;
+  images: string[];
+  videoUrl: string;
   description: string;
   publish: boolean;
 }
@@ -49,39 +51,11 @@ const emptyEditor = (): EditorFormState => ({
   price: '',
   beds: '4',
   status: 'Available',
-  photoUrl: '',
-  photoKey: '',
+  images: [],
+  videoUrl: '',
   description: '',
   publish: true,
 });
-
-function compressImageToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('Could not read file'));
-    reader.onload = () => {
-      const result = String(reader.result || '');
-      const img = new Image();
-      img.onload = () => {
-        const maxWidth = 1080;
-        const scale = img.width > maxWidth ? maxWidth / img.width : 1;
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve(result);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
-      };
-      img.onerror = () => resolve(result);
-      img.src = result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
 export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
   hidden,
@@ -99,9 +73,11 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
   const [inventoryQuery, setInventoryQuery] = useState('');
   const [editorOpen, setEditorOpen] = useState(false);
   const [editor, setEditor] = useState<EditorFormState>(emptyEditor);
+  const [newImageUrl, setNewImageUrl] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   const reviewedCount = requests.filter((req) => req?.reviewed).length;
   const publishedCount = listings.filter((item) => !drafts.includes(item.id)).length;
@@ -118,14 +94,16 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
   const openAddForm = () => {
     setFormError(null);
     setConfirmDeleteId(null);
+    setNewImageUrl('');
     setEditor(emptyEditor());
     setEditorOpen(true);
   };
 
   const openEditForm = (item: HomeListing) => {
-    const resolved = resolveListingImage(item);
+    const gallery = resolveListingGallery(item).map((g) => g.src);
     setFormError(null);
     setConfirmDeleteId(null);
+    setNewImageUrl('');
     setEditor({
       id: item.id,
       convexId: item.convexId,
@@ -136,33 +114,110 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
       price: String(item.price),
       beds: item.beds !== undefined ? String(item.beds) : '',
       status: item.status || 'Available',
-      photoUrl: item.photoUrl || resolved?.src || '',
-      photoKey: item.photo || '',
+      images: gallery,
+      videoUrl: item.videoUrl || '',
       description: item.description,
       publish: !drafts.includes(item.id),
     });
     setEditorOpen(true);
   };
 
-  const handleImageUpload = async (file: File | undefined, resetInput: () => void) => {
-    if (!file) return;
+  const handleMultiImageUpload = async (
+    fileList: FileList | null,
+    resetInput: () => void
+  ) => {
+    if (!fileList || fileList.length === 0) return;
+    const files = Array.from(fileList);
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
-    if (!validTypes.includes(file.type) || file.size > 10 * 1024 * 1024) {
-      onNotify('Choose a JPG, PNG, WebP or AVIF image up to 10 MB.');
+    const validFiles = files.filter(
+      (f) => validTypes.includes(f.type) && f.size <= 15 * 1024 * 1024
+    );
+
+    if (validFiles.length === 0) {
+      onNotify('Choose JPG, PNG, WebP, or AVIF images up to 15 MB each.');
       resetInput();
       return;
     }
+
     setUploadingImage(true);
     try {
-      const dataUrl = await compressImageToDataUrl(file);
-      const uploadedUrl = await uploadImageAsset(dataUrl, file.name);
-      setEditor((prev) => ({ ...prev, photoUrl: uploadedUrl }));
-      onNotify('Listing image ready.');
+      const uploadedUrls = await Promise.all(validFiles.map((file) => uploadMediaFile(file)));
+      setEditor((prev) => ({
+        ...prev,
+        images: [...prev.images, ...uploadedUrls.filter((u) => !prev.images.includes(u))],
+      }));
+      onNotify(
+        uploadedUrls.length === 1
+          ? '1 listing photo added.'
+          : `${uploadedUrls.length} listing photos added.`
+      );
     } catch {
-      onNotify('Unable to process image file.');
+      onNotify('Unable to process one or more image files.');
     } finally {
       setUploadingImage(false);
+      resetInput();
     }
+  };
+
+  const handleVideoUpload = async (file: File | undefined, resetInput: () => void) => {
+    if (!file) return;
+    const isVideo =
+      file.type.startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
+    if (!isVideo || file.size > 60 * 1024 * 1024) {
+      onNotify('Choose an MP4, WebM, or MOV video file up to 60 MB.');
+      resetInput();
+      return;
+    }
+
+    setUploadingVideo(true);
+    try {
+      const uploadedUrl = await uploadMediaFile(file);
+      setEditor((prev) => ({ ...prev, videoUrl: uploadedUrl }));
+      onNotify('Property video uploaded.');
+    } catch {
+      onNotify('Unable to upload video file.');
+    } finally {
+      setUploadingVideo(false);
+      resetInput();
+    }
+  };
+
+  const handleAddImageUrl = () => {
+    const clean = newImageUrl.trim();
+    if (!clean) return;
+    setEditor((prev) => ({
+      ...prev,
+      images: prev.images.includes(clean) ? prev.images : [...prev.images, clean],
+    }));
+    setNewImageUrl('');
+  };
+
+  const moveImage = (index: number, direction: -1 | 1) => {
+    setEditor((prev) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= prev.images.length) return prev;
+      const copy = [...prev.images];
+      const [moved] = copy.splice(index, 1);
+      copy.splice(nextIndex, 0, moved);
+      return { ...prev, images: copy };
+    });
+  };
+
+  const makeCoverImage = (index: number) => {
+    setEditor((prev) => {
+      if (index <= 0 || index >= prev.images.length) return prev;
+      const copy = [...prev.images];
+      const [chosen] = copy.splice(index, 1);
+      copy.unshift(chosen);
+      return { ...prev, images: copy };
+    });
+  };
+
+  const removeImageAt = (index: number) => {
+    setEditor((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleEditorSubmit = (e: React.FormEvent) => {
@@ -181,6 +236,7 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
       editor.id ||
       `${cleanName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'listing'}-${Date.now().toString(36)}`;
 
+    const cleanImages = editor.images.map((u) => u.trim()).filter(Boolean);
     const saved: HomeListing = {
       id,
       convexId: editor.convexId,
@@ -191,8 +247,10 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
       price: Math.round(numericPrice),
       beds: editor.beds.trim() ? Number(editor.beds) : undefined,
       status: editor.status || 'Available',
-      photo: editor.photoKey || undefined,
-      photoUrl: editor.photoUrl.trim() || undefined,
+      photo: undefined,
+      photoUrl: cleanImages[0] || undefined,
+      images: cleanImages,
+      videoUrl: editor.videoUrl.trim() || undefined,
       description: cleanDesc,
     };
 
@@ -209,6 +267,8 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
       .toLowerCase()
       .includes(q);
   });
+
+  const parsedPreviewVideo = parseVideoEmbed(editor.videoUrl);
 
   return (
     <section id="team" data-surface="" hidden={hidden} className="workspace">
@@ -227,8 +287,8 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
             </div>
           </div>
           <p>
-            Manage live property listings, upload photography, control publish states, and review
-            incoming buyer enquiries across Website and App.
+            Manage live property listings, upload multiple photos and walkthrough videos, control
+            publish states, and review incoming buyer enquiries across Website and App.
           </p>
         </header>
 
@@ -341,7 +401,7 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
                   />
                 </label>
 
-                <label>
+                <label className="span">
                   Availability status
                   <select
                     name="listingStatus"
@@ -356,54 +416,170 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
                   </select>
                 </label>
 
-                <label>
-                  Image URL (or upload below)
-                  <input
-                    name="listingPhotoUrl"
-                    type="url"
-                    value={editor.photoUrl}
-                    onChange={(e) =>
-                      setEditor((p) => ({ ...p, photoUrl: e.target.value, photoKey: '' }))
-                    }
-                    placeholder="https://… or /assets/courtyard.webp"
-                  />
-                </label>
+                <div className="span admin-media-section">
+                  <div className="admin-media-head">
+                    <strong>Property photos ({editor.images.length})</strong>
+                    <span>First photo is used as the cover card image.</span>
+                  </div>
 
-                <div className="span">
                   <div className="admin-image-box">
-                    {editor.photoUrl ? (
-                      <img
-                        className="admin-image-preview"
-                        src={editor.photoUrl}
-                        alt="Listing preview"
-                      />
-                    ) : null}
                     <label>
-                      {uploadingImage ? 'Processing image…' : 'Upload property image'}
+                      {uploadingImage ? 'Uploading photos…' : 'Upload multiple images'}
                       <input
+                        name="listingPhotosUpload"
                         type="file"
+                        multiple
                         accept="image/jpeg,image/png,image/webp,image/avif"
                         disabled={uploadingImage}
                         onChange={(e) => {
                           const input = e.currentTarget;
-                          void handleImageUpload(input.files?.[0], () => {
+                          void handleMultiImageUpload(input.files, () => {
                             input.value = '';
                           });
                         }}
                       />
                     </label>
-                    {editor.photoUrl && (
+
+                    <div className="admin-url-adder">
+                      <input
+                        name="listingPhotoUrl"
+                        type="url"
+                        value={newImageUrl}
+                        onChange={(e) => setNewImageUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddImageUrl();
+                          }
+                        }}
+                        placeholder="Or paste photo URL (https://…)"
+                      />
                       <button
                         type="button"
                         className="button outline"
-                        onClick={() =>
-                          setEditor((p) => ({ ...p, photoUrl: '', photoKey: '' }))
-                        }
+                        onClick={handleAddImageUrl}
                       >
-                        Remove image
+                        Add URL
                       </button>
-                    )}
+                    </div>
                   </div>
+
+                  {editor.images.length > 0 && (
+                    <div className="admin-gallery-grid">
+                      {editor.images.map((src, idx) => (
+                        <div key={`${src}-${idx}`} className="admin-thumb-card">
+                          <div className="admin-thumb-media">
+                            <img src={src} alt={`Property photo ${idx + 1}`} />
+                            {idx === 0 && <span className="admin-cover-tag">Cover</span>}
+                          </div>
+                          <div className="admin-thumb-actions">
+                            {idx > 0 && (
+                              <button
+                                type="button"
+                                className="button outline"
+                                onClick={() => makeCoverImage(idx)}
+                                title="Set as cover image"
+                              >
+                                Cover
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="button outline"
+                              disabled={idx === 0}
+                              onClick={() => moveImage(idx, -1)}
+                              aria-label={`Move photo ${idx + 1} left`}
+                            >
+                              ←
+                            </button>
+                            <button
+                              type="button"
+                              className="button outline"
+                              disabled={idx === editor.images.length - 1}
+                              onClick={() => moveImage(idx, 1)}
+                              aria-label={`Move photo ${idx + 1} right`}
+                            >
+                              →
+                            </button>
+                            <button
+                              type="button"
+                              className="button danger"
+                              onClick={() => removeImageAt(idx)}
+                              aria-label={`Remove photo ${idx + 1}`}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="span admin-media-section">
+                  <div className="admin-media-head">
+                    <strong>Property walkthrough video (optional)</strong>
+                    <span>MP4, WebM, MOV upload or YouTube / Vimeo link.</span>
+                  </div>
+
+                  <div className="admin-image-box">
+                    <label>
+                      {uploadingVideo ? 'Uploading video…' : 'Upload video file'}
+                      <input
+                        name="listingVideoUpload"
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime,video/*"
+                        disabled={uploadingVideo}
+                        onChange={(e) => {
+                          const input = e.currentTarget;
+                          void handleVideoUpload(input.files?.[0], () => {
+                            input.value = '';
+                          });
+                        }}
+                      />
+                    </label>
+
+                    <label className="admin-video-url-field">
+                      Or paste video URL
+                      <input
+                        name="listingVideoUrl"
+                        type="url"
+                        value={editor.videoUrl}
+                        onChange={(e) =>
+                          setEditor((p) => ({ ...p, videoUrl: e.target.value }))
+                        }
+                        placeholder="https://… or YouTube / Vimeo link"
+                      />
+                    </label>
+                  </div>
+
+                  {parsedPreviewVideo && (
+                    <div className="admin-video-preview-row">
+                      {parsedPreviewVideo.kind === 'video' ? (
+                        <video
+                          className="admin-video-preview"
+                          src={parsedPreviewVideo.src}
+                          controls
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <iframe
+                          className="admin-video-preview"
+                          src={parsedPreviewVideo.src}
+                          title="Video preview"
+                          allowFullScreen
+                        />
+                      )}
+                      <button
+                        type="button"
+                        className="button danger"
+                        onClick={() => setEditor((p) => ({ ...p, videoUrl: '' }))}
+                      >
+                        Remove video
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <label className="span">
@@ -433,7 +609,11 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
               {formError && <p className="form-error">{formError}</p>}
 
               <div className="form-actions">
-                <button type="submit" className="button primary">
+                <button
+                  type="submit"
+                  className="button primary"
+                  disabled={uploadingImage || uploadingVideo}
+                >
                   {editor.id ? 'Save changes' : 'Create listing'}
                 </button>
                 <button
@@ -457,6 +637,8 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
               filteredListings.map((item) => {
                 const isDraft = drafts.includes(item.id);
                 const art = resolveListingImage(item);
+                const photoCount = resolveListingGallery(item).length;
+                const hasVideo = Boolean(parseVideoEmbed(item.videoUrl));
                 const awaitingConfirm = confirmDeleteId === item.id;
 
                 return (
@@ -478,7 +660,9 @@ export const ReviewTeamView: React.FC<ReviewTeamViewProps> = ({
                         {ngn(item.price)}
                       </span>
                       <span>
-                        {item.status || 'Available'} · {isDraft ? 'Draft (Hidden)' : 'Published'}
+                        {item.status || 'Available'} · {isDraft ? 'Draft (Hidden)' : 'Published'} ·{' '}
+                        {photoCount} {photoCount === 1 ? 'photo' : 'photos'}
+                        {hasVideo ? ' · Video' : ''}
                       </span>
                     </div>
 

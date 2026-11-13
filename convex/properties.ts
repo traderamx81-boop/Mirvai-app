@@ -30,6 +30,21 @@ export const getById = query({
   },
 });
 
+// File storage upload helpers for images & video walkthroughs
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const getStorageUrl = mutation({
+  args: { storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});
+
 // Mutations
 export const add = mutation({
   args: {
@@ -44,6 +59,8 @@ export const add = mutation({
     sqm: v.optional(v.number()),
     photo: v.optional(v.string()),
     photoUrl: v.optional(v.string()),
+    images: v.optional(v.array(v.string())),
+    videoUrl: v.optional(v.string()),
     description: v.string(),
     status: v.string(),
     isDraft: v.boolean(),
@@ -86,6 +103,8 @@ export const upsert = mutation({
     beds: v.optional(v.number()),
     photo: v.optional(v.string()),
     photoUrl: v.optional(v.string()),
+    images: v.optional(v.array(v.string())),
+    videoUrl: v.optional(v.string()),
     description: v.string(),
     status: v.string(),
     isDraft: v.boolean(),
@@ -107,6 +126,8 @@ export const upsert = mutation({
         beds: args.beds,
         photo: args.photo,
         photoUrl: args.photoUrl,
+        images: args.images,
+        videoUrl: args.videoUrl,
         description: args.description,
         status: args.status,
         isDraft: args.isDraft,
@@ -125,6 +146,8 @@ export const upsert = mutation({
       beds: args.beds,
       photo: args.photo,
       photoUrl: args.photoUrl,
+      images: args.images,
+      videoUrl: args.videoUrl,
       description: args.description,
       status: args.status,
       isDraft: args.isDraft,
@@ -147,6 +170,8 @@ export const seedDefaults = mutation({
         beds: v.optional(v.number()),
         photo: v.optional(v.string()),
         photoUrl: v.optional(v.string()),
+        images: v.optional(v.array(v.string())),
+        videoUrl: v.optional(v.string()),
         description: v.string(),
         status: v.string(),
         isDraft: v.boolean(),
@@ -182,6 +207,8 @@ export const update = mutation({
     baths: v.optional(v.number()),
     photo: v.optional(v.string()),
     photoUrl: v.optional(v.string()),
+    images: v.optional(v.array(v.string())),
+    videoUrl: v.optional(v.string()),
     description: v.optional(v.string()),
     status: v.optional(v.string()),
     isDraft: v.optional(v.boolean()),

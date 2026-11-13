@@ -8,7 +8,7 @@ import {
   categoryLabel,
 } from './courtyardReview';
 
-const TIMEOUT_MS = 3500;
+const TIMEOUT_MS = 4500;
 
 async function convexFetch(
   endpoint: 'query' | 'mutation',
@@ -45,6 +45,7 @@ export function mapConvexProperties(rawProps: any[]): {
   const listings: HomeListing[] = rawProps.map((p: any) => {
     const id = String(p.slug || p._id);
     if (p.isDraft) drafts.push(id);
+    const defaultMatch = !p.images && !p.photoUrl ? defaultHomes.find((d) => d.id === id) : undefined;
     return {
       id,
       convexId: p._id,
@@ -57,6 +58,8 @@ export function mapConvexProperties(rawProps: any[]): {
       status: String(p.status || 'Available'),
       photo: p.photo,
       photoUrl: p.photoUrl,
+      images: Array.isArray(p.images) ? p.images : defaultMatch?.images,
+      videoUrl: p.videoUrl ? String(p.videoUrl) : undefined,
       description: String(p.description || ''),
     };
   });
@@ -88,6 +91,9 @@ export async function syncListingCreateOrUpdate(
   listing: HomeListing,
   isDraft: boolean
 ): Promise<string | undefined> {
+  const imagesList = Array.isArray(listing.images) ? listing.images : undefined;
+  const primaryPhotoUrl = listing.photoUrl || (imagesList && imagesList[0]) || undefined;
+
   // 1. Upsert into Convex `properties` table by slug
   const convexRes = await convexFetch('mutation', 'properties:upsert', {
     slug: listing.id,
@@ -98,7 +104,9 @@ export async function syncListingCreateOrUpdate(
     price: listing.price,
     beds: listing.beds,
     photo: listing.photo,
-    photoUrl: listing.photoUrl,
+    photoUrl: primaryPhotoUrl,
+    images: imagesList,
+    videoUrl: listing.videoUrl || undefined,
     description: listing.description,
     status: listing.status || 'Available',
     isDraft,
@@ -116,7 +124,9 @@ export async function syncListingCreateOrUpdate(
       price: listing.price,
       status: isDraft ? 'Draft' : listing.status || 'Available',
       description: listing.description,
-      image_url: listing.photoUrl || listing.photo || '',
+      image_url: primaryPhotoUrl || listing.photo || '',
+      images: imagesList,
+      videoUrl: listing.videoUrl || undefined,
     };
     const method = action === 'add' ? 'POST' : 'PUT';
     const url =
@@ -197,6 +207,100 @@ export async function syncEnquiryReview(req: ReviewRequest, reviewed: boolean): 
   }
 }
 
+async function compressImageFile(file: File): Promise<Blob | File> {
+  if (!file.type.startsWith('image/') || file.size < 450 * 1024) {
+    return file;
+  }
+  return await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onerror = () => resolve(file);
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => resolve(file);
+      img.onload = () => {
+        const maxWidth = 1400;
+        const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => resolve(blob || file),
+          'image/jpeg',
+          0.84
+        );
+      };
+      img.src = String(reader.result || '');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToDataUrl(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read media file'));
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function uploadMediaFile(file: File): Promise<string> {
+  const payloadBlob = file.type.startsWith('image/')
+    ? await compressImageFile(file)
+    : file;
+
+  // 1. Try Convex File Storage CDN directly (ideal for multi-image & large video files)
+  try {
+    const uploadUrlRes = await convexFetch('mutation', 'properties:generateUploadUrl', {});
+    if (uploadUrlRes.ok && typeof uploadUrlRes.value === 'string') {
+      const postRes = await fetch(uploadUrlRes.value, {
+        method: 'POST',
+        headers: { 'Content-Type': payloadBlob.type || file.type || 'application/octet-stream' },
+        body: payloadBlob,
+      });
+      if (postRes.ok) {
+        const { storageId } = await postRes.json();
+        if (storageId) {
+          const urlRes = await convexFetch('mutation', 'properties:getStorageUrl', {
+            storageId,
+          });
+          if (urlRes.ok && typeof urlRes.value === 'string') {
+            return urlRes.value;
+          }
+        }
+      }
+    }
+  } catch {
+    // Fall back to local Express binary upload or dataUrl
+  }
+
+  // 2. Local Express binary upload fallback (saves to /uploads/...)
+  try {
+    const res = await fetch('/api/upload-media', {
+      method: 'POST',
+      headers: {
+        'Content-Type': payloadBlob.type || file.type || 'application/octet-stream',
+        'x-filename': file.name,
+      },
+      body: payloadBlob,
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json?.url) return json.url;
+    }
+  } catch {
+    // Fall back to inline data URL for small local files
+  }
+
+  return await fileToDataUrl(payloadBlob);
+}
+
 export async function uploadImageAsset(dataUrl: string, filename: string): Promise<string> {
   try {
     const res = await fetch('/api/upload', {
@@ -209,7 +313,7 @@ export async function uploadImageAsset(dataUrl: string, filename: string): Promi
       if (json?.url) return json.url;
     }
   } catch {
-    // Return compressed dataUrl cleanly when hosted statically (e.g., Vercel)
+    // Return compressed dataUrl cleanly when hosted statically
   }
   return dataUrl;
 }
@@ -249,6 +353,8 @@ export async function fetchConvexSnapshot(): Promise<{
           beds: h.beds,
           photo: h.photo,
           photoUrl: h.photoUrl,
+          images: h.images,
+          videoUrl: h.videoUrl,
           description: h.description,
           status: h.status || 'Available',
           isDraft: false,

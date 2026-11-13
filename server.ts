@@ -10,9 +10,14 @@ const __dirname = path.dirname(__filename);
 const PORT = 3000;
 const DB_FILE = path.join(__dirname, 'data', 'db.json');
 
-// Ensure data directory exists
+const UPLOADS_DIR = path.join(__dirname, 'data', 'uploads');
+
+// Ensure data and uploads directories exist
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
   fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+}
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
 export interface StoredProperty {
@@ -30,6 +35,8 @@ export interface StoredProperty {
   description: string;
   image_url: string;
   image_key?: string | null;
+  images?: string[];
+  videoUrl?: string;
   verified: number;
   featured?: boolean;
   features: string[];
@@ -310,7 +317,9 @@ function broadcastRealtime(event: string, payload: any) {
 
 async function startServer() {
   const app = express();
-  app.use(express.json({ limit: '15mb' }));
+  app.use('/uploads', express.static(UPLOADS_DIR));
+  app.use('/api/upload-media', express.raw({ type: ['video/*', 'image/*', 'application/octet-stream'], limit: '60mb' }));
+  app.use(express.json({ limit: '25mb' }));
   // Favicon explicit routes
   app.get('/favicon.ico', (_req: Request, res: Response) => {
     const icoPath = path.join(__dirname, 'public', 'favicon.ico');
@@ -475,6 +484,8 @@ async function startServer() {
       description: b.description || '',
       image_url: b.image_url || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
       image_key: null,
+      images: Array.isArray(b.images) ? b.images : undefined,
+      videoUrl: b.videoUrl || undefined,
       verified: b.verified !== undefined ? Number(b.verified) : 1,
       featured: !!b.featured,
       features: Array.isArray(b.features) ? b.features : (b.features ? String(b.features).split('\n').filter(Boolean) : []),
@@ -512,6 +523,8 @@ async function startServer() {
         description: b.description || '',
         image_url: b.image_url || '',
         image_key: null,
+        images: Array.isArray(b.images) ? b.images : undefined,
+        videoUrl: b.videoUrl || undefined,
         verified: b.verified !== undefined ? Number(b.verified) : 1,
         featured: !!b.featured,
         features: Array.isArray(b.features) ? b.features : [],
@@ -537,6 +550,8 @@ async function startServer() {
       titleDocument: b.titleDocument !== undefined ? b.titleDocument : current.titleDocument,
       description: b.description !== undefined ? b.description : current.description,
       image_url: b.image_url !== undefined ? b.image_url : current.image_url,
+      images: b.images !== undefined ? (Array.isArray(b.images) ? b.images : []) : current.images,
+      videoUrl: b.videoUrl !== undefined ? b.videoUrl : current.videoUrl,
       verified: b.verified !== undefined ? Number(b.verified) : current.verified,
       featured: b.featured !== undefined ? !!b.featured : current.featured,
       features: Array.isArray(b.features) ? b.features : (b.features ? String(b.features).split('\n').filter(Boolean) : current.features),
@@ -766,9 +781,23 @@ async function startServer() {
     res.json({ totals, count: db.analytics.length });
   });
 
+  // Binary image & video upload handler (local disk persistence fallback)
+  app.post('/api/upload-media', (req: Request, res: Response) => {
+    const raw = req.body;
+    if (!Buffer.isBuffer(raw) || raw.length === 0) {
+      return res.status(400).json({ error: 'No binary media uploaded' });
+    }
+    const headerName = String(req.headers['x-filename'] || 'media');
+    const safeExt = path.extname(headerName).replace(/[^a-zA-Z0-9.]/g, '') || '.bin';
+    const fileId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}${safeExt}`;
+    const dest = path.join(UPLOADS_DIR, fileId);
+    fs.writeFileSync(dest, raw);
+    res.status(201).json({ success: true, url: `/uploads/${fileId}` });
+  });
+
   // Image Upload handler (Base64 data URL persistence)
   app.post('/api/upload', (req: Request, res: Response) => {
-    const { dataUrl, filename } = req.body;
+    const { dataUrl } = req.body || {};
     if (!dataUrl) return res.status(400).json({ error: 'No data URL provided' });
     res.json({ success: true, url: dataUrl });
   });

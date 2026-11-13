@@ -190,3 +190,46 @@ test('mapConvexProperties and mapConvexRequests convert Convex rows accurately',
   assert.equal(reqs[0].timeline, 'Within 1 month');
 });
 
+test('resolveListingGallery deduplicates and orders multiple images accurately', async () => {
+  const { resolveListingGallery } = await import('./courtyardReview');
+
+  const gallery = resolveListingGallery({
+    name: 'Test Villa',
+    photoUrl: 'https://example.com/1.jpg',
+    images: [
+      'https://example.com/1.jpg',
+      'https://example.com/2.jpg',
+      '/assets/courtyard.webp',
+    ],
+  });
+  assert.equal(gallery.length, 3);
+  assert.equal(gallery[0].src, 'https://example.com/1.jpg');
+  assert.equal(gallery[1].src, 'https://example.com/2.jpg');
+  assert.equal(gallery[2].src, '/assets/courtyard.webp');
+
+  const emptyExplicit = resolveListingGallery({
+    name: 'Cleared Villa',
+    images: [],
+  });
+  assert.equal(emptyExplicit.length, 0);
+});
+
+test('parseVideoEmbed detects uploaded videos, YouTube, Vimeo, and rejects blanks', async () => {
+  const { parseVideoEmbed } = await import('./courtyardReview');
+
+  assert.equal(parseVideoEmbed(''), null);
+  assert.deepEqual(parseVideoEmbed('/uploads/walkthrough.mp4'), {
+    kind: 'video',
+    src: '/uploads/walkthrough.mp4',
+  });
+  assert.deepEqual(parseVideoEmbed('https://www.youtube.com/watch?v=dQw4w9WgXcQ'), {
+    kind: 'embed',
+    src: 'https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0',
+  });
+  assert.deepEqual(parseVideoEmbed('https://vimeo.com/123456789'), {
+    kind: 'embed',
+    src: 'https://player.vimeo.com/video/123456789',
+  });
+});
+
+
