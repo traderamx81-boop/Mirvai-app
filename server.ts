@@ -74,8 +74,26 @@ export interface ChatConversation {
   createdAt: string;
 }
 
+export interface StoredEnquiry {
+  id: string;
+  kind: 'Viewing' | 'Enquiry';
+  title: string;
+  summary: string;
+  location?: string;
+  timeline?: string;
+  propertyType?: string;
+  budget?: string;
+  clientName?: string;
+  clientContact?: string;
+  basedIn?: string;
+  notes?: string;
+  reviewed: boolean;
+  createdAt: string;
+}
+
 export interface DatabaseSchema {
   properties: StoredProperty[];
+  enquiries?: StoredEnquiry[];
   settings: WebsiteSettings;
   conversations: ChatConversation[];
   messages: ChatMessage[];
@@ -292,6 +310,7 @@ function broadcastRealtime(event: string, payload: any) {
 
 async function startServer() {
   const app = express();
+  app.use(express.json({ limit: '15mb' }));
   // Favicon explicit routes
   app.get('/favicon.ico', (_req: Request, res: Response) => {
     const icoPath = path.join(__dirname, 'public', 'favicon.ico');
@@ -440,9 +459,9 @@ async function startServer() {
   });
 
   app.post('/api/properties', (req: Request, res: Response) => {
-    const b = req.body;
+    const b = req.body || {};
     const newProp: StoredProperty = {
-      id: 'prop-' + Date.now(),
+      id: b.id || 'prop-' + Date.now(),
       reference: b.reference || `MIR-${Math.floor(100 + Math.random() * 900)}`,
       slug: (b.title || 'property').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Math.floor(100 + Math.random() * 900),
       title: b.title || 'Untitled Property',
@@ -462,7 +481,12 @@ async function startServer() {
       createdAt: new Date().toISOString(),
     };
 
-    db.properties.unshift(newProp);
+    const existingIdx = db.properties.findIndex((p) => p.id === newProp.id);
+    if (existingIdx !== -1) {
+      db.properties[existingIdx] = { ...db.properties[existingIdx], ...newProp };
+    } else {
+      db.properties.unshift(newProp);
+    }
     saveDB(db);
     broadcastRealtime('property_added', newProp);
     res.status(201).json(newProp);
@@ -470,11 +494,36 @@ async function startServer() {
 
   app.put('/api/properties/:id', (req: Request, res: Response) => {
     const index = db.properties.findIndex((p) => p.id === req.params.id || p.slug === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Property not found' });
+    const b = req.body || {};
+
+    if (index === -1) {
+      const created: StoredProperty = {
+        id: req.params.id,
+        reference: b.reference || `MIR-${Math.floor(100 + Math.random() * 900)}`,
+        slug: (b.title || req.params.id).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        title: b.title || 'Untitled Property',
+        location: b.location || 'Lagos, Nigeria',
+        type: b.type || 'Terrace duplex',
+        category: b.category || 'terrace-duplex',
+        price: Number(b.price) || 0,
+        status: b.status || 'Available',
+        completionStatus: b.completionStatus || 'Completed',
+        titleDocument: b.titleDocument || 'Governor’s Consent',
+        description: b.description || '',
+        image_url: b.image_url || '',
+        image_key: null,
+        verified: b.verified !== undefined ? Number(b.verified) : 1,
+        featured: !!b.featured,
+        features: Array.isArray(b.features) ? b.features : [],
+        createdAt: new Date().toISOString(),
+      };
+      db.properties.unshift(created);
+      saveDB(db);
+      broadcastRealtime('property_updated', created);
+      return res.json(created);
+    }
 
     const current = db.properties[index];
-    const b = req.body;
-
     const updated: StoredProperty = {
       ...current,
       title: b.title !== undefined ? b.title : current.title,
@@ -503,10 +552,10 @@ async function startServer() {
     const id = req.params.id;
     const initialLen = db.properties.length;
     db.properties = db.properties.filter((p) => p.id !== id && p.slug !== id);
-    if (db.properties.length === initialLen) return res.status(404).json({ error: 'Property not found' });
-
-    saveDB(db);
-    broadcastRealtime('property_deleted', { id });
+    if (db.properties.length !== initialLen) {
+      saveDB(db);
+      broadcastRealtime('property_deleted', { id });
+    }
     res.json({ success: true, id });
   });
 
@@ -544,8 +593,42 @@ async function startServer() {
   });
 
   // Enquiries & Appointments handlers
+  app.get('/api/enquiries', (_req: Request, res: Response) => {
+    res.json(db.enquiries || []);
+  });
+
   app.post('/api/enquiries', (req: Request, res: Response) => {
-    res.json({ success: true, message: 'Enquiry received by Mirvai Desk' });
+    const b = req.body || {};
+    const entry: StoredEnquiry = {
+      id: b.id || 'enq-' + Date.now(),
+      kind: b.kind === 'Viewing' ? 'Viewing' : 'Enquiry',
+      title: b.title || 'MIRVAI',
+      summary: b.summary || '',
+      location: b.location,
+      timeline: b.timeline,
+      propertyType: b.propertyType,
+      budget: b.budget,
+      clientName: b.clientName,
+      clientContact: b.clientContact,
+      basedIn: b.basedIn,
+      notes: b.notes,
+      reviewed: false,
+      createdAt: new Date().toISOString(),
+    };
+    db.enquiries = [entry, ...(db.enquiries || [])].slice(0, 100);
+    saveDB(db);
+    broadcastRealtime('enquiry_added', entry);
+    res.status(201).json({ success: true, enquiry: entry, message: 'Enquiry received by Mirvai Desk' });
+  });
+
+  app.patch('/api/enquiries/:id', (req: Request, res: Response) => {
+    const list = db.enquiries || [];
+    const target = list.find((item) => item.id === req.params.id);
+    if (!target) return res.status(404).json({ error: 'Enquiry not found' });
+    target.reviewed = req.body?.reviewed !== undefined ? Boolean(req.body.reviewed) : true;
+    saveDB(db);
+    broadcastRealtime('enquiry_updated', target);
+    res.json({ success: true, enquiry: target });
   });
 
   app.post('/api/appointments', (req: Request, res: Response) => {
@@ -690,13 +773,24 @@ async function startServer() {
     res.json({ success: true, url: dataUrl });
   });
 
-  // Mount Vite development middlewares
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: 'spa',
-  });
+  const distDir = path.join(__dirname, 'dist');
+  const distIndex = path.join(distDir, 'index.html');
+  const isProd = process.env.NODE_ENV === 'production' && fs.existsSync(distIndex);
 
-  app.use(vite.middlewares);
+  if (isProd) {
+    app.use(express.static(distDir, { index: 'index.html' }));
+    app.get('*', (req: Request, res: Response, next) => {
+      if (req.path.startsWith('/api/')) return next();
+      res.sendFile(distIndex);
+    });
+  } else {
+    // Mount Vite development middlewares
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  }
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[Mirvai Fullstack Engine] Running live on http://0.0.0.0:${PORT}`);

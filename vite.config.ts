@@ -1,7 +1,26 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
 import path from 'path';
 import {defineConfig, Plugin} from 'vite';
+
+function spaRoutesPlugin(): Plugin {
+  return {
+    name: 'mirvai-spa-route-copies',
+    closeBundle() {
+      const distDir = path.resolve(__dirname, 'dist');
+      const indexFile = path.join(distDir, 'index.html');
+      if (!fs.existsSync(indexFile)) return;
+      const html = fs.readFileSync(indexFile, 'utf-8');
+      for (const route of ['app', 'team', 'team-view', 'admin']) {
+        const routeDir = path.join(distDir, route);
+        fs.mkdirSync(routeDir, { recursive: true });
+        fs.writeFileSync(path.join(routeDir, 'index.html'), html, 'utf-8');
+      }
+      fs.writeFileSync(path.join(distDir, '404.html'), html, 'utf-8');
+    },
+  };
+}
 
 function mirvaiApiPlugin(): Plugin {
   return {
@@ -137,7 +156,7 @@ function mirvaiApiPlugin(): Plugin {
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), mirvaiApiPlugin()],
+    plugins: [react(), tailwindcss(), mirvaiApiPlugin(), spaRoutesPlugin()],
     resolve: {
       alias: [
         { find: 'next/image', replacement: path.resolve(__dirname, 'src/shims/next-image.tsx') },

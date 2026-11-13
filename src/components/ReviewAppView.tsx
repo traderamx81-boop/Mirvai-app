@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   AppScreen,
   categories,
   categoryLabel,
   HomeListing,
   ngn,
+  resolveListingImage,
   ReviewRequest,
   stockImages,
 } from '../lib/courtyardReview';
@@ -13,12 +14,14 @@ interface ReviewAppViewProps {
   hidden: boolean;
   appScreen: AppScreen;
   appFilter: string;
+  appQuery: string;
   visibleListings: HomeListing[];
   savedListings: HomeListing[];
   requests: ReviewRequest[];
   portraitUrl: string;
   onSelectScreen: (screen: AppScreen) => void;
   onFilterChange: (categoryId: string) => void;
+  onQueryChange: (query: string) => void;
   onJumpToWebsiteProperties: () => void;
   onOpenMenu: () => void;
   onOpenProperty: (propertyId: string) => void;
@@ -31,12 +34,14 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
   hidden,
   appScreen,
   appFilter,
+  appQuery,
   visibleListings,
   savedListings,
   requests,
   portraitUrl,
   onSelectScreen,
   onFilterChange,
+  onQueryChange,
   onJumpToWebsiteProperties,
   onOpenMenu,
   onOpenProperty,
@@ -45,6 +50,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
   onClearPortrait,
 }) => {
   const screenRef = useRef<HTMLDivElement>(null);
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
   const filterOptions: [string, string][] = [['all', 'All properties'], ...categories];
 
   const handleScreenSelect = (next: AppScreen) => {
@@ -54,12 +60,18 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
     }
   };
 
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const renderAppCards = (list: HomeListing[], emptyMessage: string) => {
     if (list.length === 0) {
       return <p className="empty">{emptyMessage}</p>;
     }
     return list.map((item) => {
-      const art = item.photo ? stockImages[item.photo] : undefined;
+      const art = resolveListingImage(item);
+      const isExpanded = Boolean(expandedIds[item.id]);
+
       return (
         <article key={item.id} className="app-card">
           <button
@@ -75,7 +87,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                 <svg aria-hidden="true">
                   <use href="#i-home" />
                 </svg>{' '}
-                Concept listing
+                Preview
               </span>
             )}
           </button>
@@ -88,9 +100,20 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                 {item.name}
               </button>
             </h3>
-            <span className="price">
-              {ngn(item.price)} <span className="mini-meta">· sample price</span>
-            </span>
+            <div className="card-footer-row">
+              <span className="price">{ngn(item.price)}</span>
+              <button
+                type="button"
+                className="card-desc-toggle"
+                aria-expanded={isExpanded}
+                onClick={() => toggleExpand(item.id)}
+              >
+                {isExpanded ? 'Hide' : 'Description'}
+              </button>
+            </div>
+            {isExpanded && (
+              <p className="card-desc-panel">{item.description}</p>
+            )}
           </div>
         </article>
       );
@@ -163,6 +186,16 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                   alt={stockImages.courtyard.alt}
                 />
                 <div className="screen-inner">
+                  <div className="app-search-wrap">
+                    <input
+                      type="search"
+                      className="app-search"
+                      aria-label="Search locations"
+                      value={appQuery}
+                      onChange={(e) => onQueryChange(e.target.value)}
+                      placeholder="Search location (Lekki, Island, Ikeja…)"
+                    />
+                  </div>
                   <div className="filters" aria-label="App property categories">
                     {filterOptions.map(([id, label]) => (
                       <button
@@ -180,7 +213,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                   <div className="app-cards">
                     {renderAppCards(
                       visibleListings,
-                      'No sample properties match this selection. Try another category or area.'
+                      'No properties match this selection. Try another category or location.'
                     )}
                   </div>
                   <p className="fineprint">Sample properties and prices.</p>
@@ -195,7 +228,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                 <div className="app-cards">
                   {renderAppCards(
                     savedListings,
-                    'No saved homes yet. Open a sample listing and save it to your shortlist.'
+                    'No saved homes yet. Open a listing and save it to your shortlist.'
                   )}
                 </div>
               </div>
@@ -206,11 +239,10 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                 <p className="eyebrow">YOUR ACTIVITY</p>
                 <h2>Enquiries.</h2>
                 <p className="inline-note">
-                  This is a local demo. Website messaging is incoming; no one receives these
-                  requests.
+                  Your recent property enquiries and viewing requests appear here and sync to Team view.
                 </p>
                 {requests.length === 0 ? (
-                  <p className="empty">No requests yet. Try a sample viewing or enquiry.</p>
+                  <p className="empty">No requests yet. Try a viewing or enquiry.</p>
                 ) : (
                   requests.map((req) => (
                     <div key={req.id} className="item-row">
@@ -219,7 +251,13 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                           {req.kind} · {req.title}
                         </strong>
                         <span>{req.summary}</span>
-                        <span>{req.reviewed ? 'Reviewed in demo' : 'New · demo only'}</span>
+                        {req.clientContact && (
+                          <span>
+                            {req.clientName ? `${req.clientName} · ` : ''}
+                            {req.clientContact}
+                          </span>
+                        )}
+                        <span>{req.reviewed ? 'Reviewed' : 'New'}</span>
                       </div>
                     </div>
                   ))
@@ -230,7 +268,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                     className="button dark"
                     onClick={() => onEnquire()}
                   >
-                    Try a general enquiry
+                    Make an enquiry
                   </button>
                 </div>
               </div>
@@ -280,7 +318,7 @@ export const ReviewAppView: React.FC<ReviewAppViewProps> = ({
                   </button>
                 )}
                 <p className="inline-note">
-                  Live accounts, messages and payments are not connected.
+                  Use the enquiry flow to connect with the MIRVAI desk.
                 </p>
               </div>
             )}

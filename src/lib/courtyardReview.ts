@@ -1,10 +1,62 @@
 export type SurfaceView = 'website' | 'app' | 'team';
 export type AppScreen = 'home' | 'saved' | 'enquiries' | 'profile';
 
-export const resolveViewFromPath = (pathname: string): SurfaceView => {
-  const normalized = pathname.toLowerCase().replace(/\/+$/, '') || '/';
-  if (normalized === '/app' || normalized.startsWith('/app/')) return 'app';
-  if (normalized === '/team' || normalized === '/team-view' || normalized.startsWith('/team/')) {
+export const WHATSAPP_NUMBER = '2349011081436';
+export const WHATSAPP_DISPLAY = '+234 901 108 1436';
+
+export const TIMELINE_OPTIONS = [
+  'Within 1 month',
+  '1 – 3 months',
+  '3 – 6 months',
+  '6 – 12 months',
+  'Just exploring',
+] as const;
+
+export const BUDGET_OPTIONS = [
+  'Flexible / Discuss',
+  'Under ₦100M',
+  '₦100M – ₦250M',
+  '₦250M – ₦500M',
+  '₦500M+',
+] as const;
+
+export const BASED_IN_OPTIONS = [
+  'Nigeria',
+  'United Kingdom',
+  'United States / Canada',
+  'Europe',
+  'Other',
+] as const;
+
+export const STATUS_OPTIONS = ['Available', 'Under Offer', 'Sold'] as const;
+
+export const LAGOS_LOCATION_SUGGESTIONS = [
+  'Ikoyi',
+  'Lekki Phase 1',
+  'Victoria Island',
+  'Oniru',
+  'Banana Island',
+  'Lagos Island',
+  'Ikeja GRA',
+  'Magodo',
+  'Ikorodu',
+  'Epe',
+  'Lagos Mainland',
+] as const;
+
+export const resolveViewFromPath = (pathname: string, hash = ''): SurfaceView => {
+  const normalizedPath = pathname.toLowerCase().replace(/\/+$/, '') || '/';
+  const normalizedHash = hash.toLowerCase().replace(/^#/, '').replace(/\/+$/, '');
+  const target = normalizedPath === '/' && normalizedHash ? normalizedHash : normalizedPath;
+
+  if (target === '/app' || target.startsWith('/app/')) return 'app';
+  if (
+    target === '/team' ||
+    target === '/team-view' ||
+    target === '/admin' ||
+    target.startsWith('/team/') ||
+    target.startsWith('/admin/')
+  ) {
     return 'team';
   }
   return 'website';
@@ -18,25 +70,38 @@ export const pathForView = (view: SurfaceView): string => {
 
 export interface HomeListing {
   id: string;
+  convexId?: string;
   name: string;
   type: string;
   area: 'Island' | 'Mainland';
   locale: string;
   price: number;
   beds?: number;
+  status?: string;
   photo?: string;
+  photoUrl?: string;
   description: string;
 }
 
 export interface ReviewRequest {
   id: string;
+  convexId?: string;
   kind: 'Viewing' | 'Enquiry';
   title: string;
   summary: string;
+  location?: string;
+  timeline?: string;
+  propertyType?: string;
+  budget?: string;
+  clientName?: string;
+  clientContact?: string;
+  basedIn?: string;
+  notes?: string;
   reviewed: boolean;
 }
 
 export interface ReviewState {
+  listings: HomeListing[];
   saved: string[];
   requests: ReviewRequest[];
   drafts: string[];
@@ -70,9 +135,21 @@ export const stockImages: Record<string, { src: string; alt: string }> = {
     src: '/assets/garden.webp',
     alt: 'Calm contemporary living room with natural materials',
   },
+  willow: {
+    src: '/properties/adeniyi-jones-terrace/01-exterior.jpg',
+    alt: 'Contemporary gated semi-detached facade in Lagos Mainland',
+  },
+  atelier: {
+    src: '/properties/adeniyi-jones-terrace/02-living-area.jpg',
+    alt: 'Bright contemporary living room with refined architectural finishes',
+  },
+  grove: {
+    src: '/assets/grove.jpg',
+    alt: 'Sunlit cleared residential land plot framed by warm limestone boundary walls',
+  },
 };
 
-export const homes: readonly HomeListing[] = [
+export const defaultHomes: readonly HomeListing[] = [
   {
     id: 'courtyard',
     name: 'The Courtyard House',
@@ -81,9 +158,10 @@ export const homes: readonly HomeListing[] = [
     locale: 'Ikoyi',
     price: 650000000,
     beds: 4,
+    status: 'Available',
     photo: 'courtyard',
     description:
-      'A contemporary detached home organised around a quiet courtyard, with generous living areas and an indoor-outdoor outlook.',
+      'A contemporary detached home organised around a quiet courtyard, with generous living areas, double-height reception, chef kitchen, and an indoor-outdoor outlook.',
   },
   {
     id: 'terraces',
@@ -93,9 +171,10 @@ export const homes: readonly HomeListing[] = [
     locale: 'Ikeja',
     price: 265000000,
     beds: 4,
+    status: 'Available',
     photo: 'terraces',
     description:
-      'A terrace duplex with a planted entrance, warm natural finishes and space for everyday family life.',
+      'A terrace duplex with a planted entrance, warm natural stone finishes, all en-suite bedrooms, and generous space for everyday family life in Ikeja.',
   },
   {
     id: 'garden',
@@ -105,9 +184,10 @@ export const homes: readonly HomeListing[] = [
     locale: 'Lekki',
     price: 175000000,
     beds: 3,
+    status: 'Available',
     photo: 'garden',
     description:
-      'A light-filled apartment with a welcoming living area and space to unwind.',
+      'A light-filled three-bedroom apartment in Lekki with welcoming entertaining spaces, floor-to-ceiling openings, 24-hour power, and space to unwind.',
   },
   {
     id: 'willow',
@@ -117,8 +197,10 @@ export const homes: readonly HomeListing[] = [
     locale: 'Magodo',
     price: 245000000,
     beds: 4,
+    status: 'Available',
+    photo: 'willow',
     description:
-      'A sample semi-detached home with four bedrooms and a layout suited to family living.',
+      'A semi-detached home in Magodo with four en-suite bedrooms, private compound parking, fitted modern kitchen, and a layout suited to family living.',
   },
   {
     id: 'atelier',
@@ -128,8 +210,10 @@ export const homes: readonly HomeListing[] = [
     locale: 'Oniru',
     price: 198000000,
     beds: 3,
+    status: 'Available',
+    photo: 'atelier',
     description:
-      'A sample off-plan home. In a real enquiry, ask about delivery milestones, payment terms and documentation.',
+      'A contemporary off-plan residence in Oniru with milestone payment schedules, clean architectural proportions, and direct Victoria Island access.',
   },
   {
     id: 'grove',
@@ -138,30 +222,81 @@ export const homes: readonly HomeListing[] = [
     area: 'Mainland',
     locale: 'Ikorodu',
     price: 42000000,
+    status: 'Available',
+    photo: 'grove',
     description:
-      'A sample land listing. In a real enquiry, check the survey, title and permitted use before committing.',
+      'Dry cleared residential land plot ready for verification of survey coordinates, registered title documentation, and immediate perimeter development.',
   },
 ];
 
-export const homeById = (id?: string): HomeListing | undefined =>
-  homes.find((entry) => entry.id === id);
+// Alias kept for backwards compatibility
+export const homes = defaultHomes;
+
+export const resolveListingImage = (
+  item: Pick<HomeListing, 'name' | 'photo' | 'photoUrl'>
+): { src: string; alt: string } | null => {
+  if (item.photoUrl && item.photoUrl.trim()) {
+    return { src: item.photoUrl.trim(), alt: item.name };
+  }
+  if (item.photo && stockImages[item.photo]) {
+    return stockImages[item.photo];
+  }
+  if (
+    item.photo &&
+    (item.photo.startsWith('/') ||
+      item.photo.startsWith('http://') ||
+      item.photo.startsWith('https://') ||
+      item.photo.startsWith('data:'))
+  ) {
+    return { src: item.photo, alt: item.name };
+  }
+  return null;
+};
+
+export const homeById = (
+  id?: string,
+  source: readonly HomeListing[] = defaultHomes
+): HomeListing | undefined => source.find((entry) => entry.id === id);
 
 export const filterHomes = (
   categoryFilter: string,
   areaFilter: string,
   drafts: readonly string[],
-  source: readonly HomeListing[] = homes
-): HomeListing[] =>
-  source.filter(
-    (item) =>
-      !drafts.includes(item.id) &&
-      (categoryFilter === 'all' || item.type === categoryFilter) &&
-      (areaFilter === 'all' || item.area === areaFilter)
-  );
+  source: readonly HomeListing[] = defaultHomes,
+  searchQuery = ''
+): HomeListing[] => {
+  const q = searchQuery.trim().toLowerCase();
+  const tokens = q ? q.split(/\s+/).filter(Boolean) : [];
 
-export const STORAGE_KEY = 'mirvai-courtyard-ecosystem-review-1';
+  return source.filter((item) => {
+    if (drafts.includes(item.id)) return false;
+    if (categoryFilter !== 'all' && item.type !== categoryFilter) return false;
+    if (areaFilter !== 'all' && item.area !== areaFilter) return false;
+
+    if (tokens.length > 0) {
+      const searchable = [
+        item.locale,
+        item.area,
+        `Lagos ${item.area}`,
+        item.name,
+        categoryLabel(item.type),
+        item.description,
+        item.status || '',
+      ]
+        .join(' ')
+        .toLowerCase();
+      if (!tokens.every((token) => searchable.includes(token))) return false;
+    }
+
+    return true;
+  });
+};
+
+export const STORAGE_KEY = 'mirvai-courtyard-ecosystem-review-2';
+const LEGACY_STORAGE_KEY = 'mirvai-courtyard-ecosystem-review-1';
 
 export const emptyReviewState = (): ReviewState => ({
+  listings: defaultHomes.map((item) => ({ ...item })),
   saved: [],
   requests: [],
   drafts: [],
@@ -170,9 +305,13 @@ export const emptyReviewState = (): ReviewState => ({
 export const loadReviewState = (): ReviewState => {
   const base = emptyReviewState();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw =
+      localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return base;
     const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed.listings) && parsed.listings.length > 0) {
+      base.listings = parsed.listings;
+    }
     if (Array.isArray(parsed.saved)) base.saved = parsed.saved;
     if (Array.isArray(parsed.requests)) base.requests = parsed.requests;
     if (Array.isArray(parsed.drafts)) base.drafts = parsed.drafts;
@@ -193,16 +332,53 @@ export const saveReviewState = (state: ReviewState): void => {
 export const toggleId = (list: readonly string[], id: string): string[] =>
   list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
 
+export const upsertListing = (
+  listings: readonly HomeListing[],
+  listing: HomeListing
+): HomeListing[] => {
+  const exists = listings.some((item) => item.id === listing.id);
+  if (exists) {
+    return listings.map((item) => (item.id === listing.id ? { ...listing } : item));
+  }
+  return [{ ...listing }, ...listings];
+};
+
+export const removeListing = (
+  listings: readonly HomeListing[],
+  id: string
+): HomeListing[] => listings.filter((item) => item.id !== id);
+
+export interface EnquiryPayload {
+  location?: string;
+  timeline?: string;
+  propertyType?: string;
+  budget?: string;
+  clientName?: string;
+  clientContact?: string;
+  basedIn?: string;
+  notes?: string;
+}
+
 export const createReviewRequest = (
   kind: 'viewing' | 'enquire',
   summary: string,
   propertyId?: string,
-  id?: string
+  id?: string,
+  sourceListings: readonly HomeListing[] = defaultHomes,
+  extra?: EnquiryPayload
 ): ReviewRequest => ({
   id: id || globalThis.crypto?.randomUUID?.() || Date.now().toString(36),
   kind: kind === 'viewing' ? 'Viewing' : 'Enquiry',
-  title: homeById(propertyId)?.name || 'MIRVAI',
+  title: homeById(propertyId, sourceListings)?.name || 'MIRVAI',
   summary,
+  location: extra?.location,
+  timeline: extra?.timeline,
+  propertyType: extra?.propertyType,
+  budget: extra?.budget,
+  clientName: extra?.clientName,
+  clientContact: extra?.clientContact,
+  basedIn: extra?.basedIn,
+  notes: extra?.notes,
   reviewed: false,
 });
 
@@ -211,3 +387,26 @@ export const markRequestAsReviewed = (
   id: string
 ): ReviewRequest[] =>
   requests.map((req) => (req.id === id ? { ...req, reviewed: true } : req));
+
+export const buildWhatsAppUrl = (opts?: {
+  propertyName?: string;
+  location?: string;
+  propertyType?: string;
+  timeline?: string;
+  phone?: string;
+}): string => {
+  const phoneDigits = (opts?.phone || WHATSAPP_NUMBER).replace(/[^0-9]/g, '') || WHATSAPP_NUMBER;
+  const parts: string[] = ['Hello Mirvai,'];
+  if (opts?.propertyName) {
+    parts.push(`I am interested in ${opts.propertyName}.`);
+  } else {
+    parts.push('I would like to make a property enquiry.');
+  }
+  if (opts?.location?.trim()) parts.push(`Preferred location: ${opts.location.trim()}.`);
+  if (opts?.propertyType && opts.propertyType !== 'Not sure yet') {
+    parts.push(`Type: ${opts.propertyType}.`);
+  }
+  if (opts?.timeline) parts.push(`Timeline: ${opts.timeline}.`);
+
+  return `https://wa.me/${phoneDigits}?text=${encodeURIComponent(parts.join(' '))}`;
+};

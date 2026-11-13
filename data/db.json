@@ -1,6 +1,46 @@
 {
   "properties": [
     {
+      "id": "courtyard",
+      "reference": "MIR-326",
+      "slug": "the-courtyard-house",
+      "title": "The Courtyard House",
+      "location": "Ikoyi, Lagos Island",
+      "type": "Detached",
+      "category": "detached",
+      "price": 650000000,
+      "status": "Available",
+      "completionStatus": "Completed",
+      "titleDocument": "Governor’s Consent",
+      "description": "A contemporary detached home organised around a quiet courtyard, with generous living areas, double-height reception, chef kitchen, and an indoor-outdoor outlook.",
+      "image_url": "/assets/courtyard.webp",
+      "image_key": null,
+      "verified": 1,
+      "featured": false,
+      "features": [],
+      "createdAt": "2026-11-13T13:42:27.592Z"
+    },
+    {
+      "id": "prop-1794577237342",
+      "reference": "MIR-805",
+      "slug": "banana-island-waterfront-villa-568",
+      "title": "Banana Island Waterfront Villa",
+      "location": "Banana Island, Lagos Island",
+      "type": "Detached",
+      "category": "detached",
+      "price": 950000000,
+      "status": "Available",
+      "completionStatus": "Completed",
+      "titleDocument": "Governor’s Consent",
+      "description": "Private dock waterfront residence.",
+      "image_url": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "image_key": null,
+      "verified": 1,
+      "featured": false,
+      "features": [],
+      "createdAt": "2026-11-13T13:40:37.342Z"
+    },
+    {
       "id": "mirvai-ikeja-001",
       "reference": "MIR-IKE-001",
       "slug": "luxury-4-bedroom-terrace-duplex-adeniyi-jones",
@@ -217,6 +257,39 @@
       "path": "/",
       "sessionId": "5afcc294-6373-4d41-8c5a-41c6aa7e9fa1",
       "timestamp": "2026-11-03T22:55:05.456Z"
+    }
+  ],
+  "enquiries": [
+    {
+      "id": "3d060141-6ecd-4bd3-b010-17e891c0bedb",
+      "kind": "Enquiry",
+      "title": "MIRVAI",
+      "summary": "Lekki Phase 1 · Not sure yet · Within 1 month · Flexible / Discuss · Looking for a verified duplex with C of O.",
+      "location": "Lekki Phase 1",
+      "timeline": "Within 1 month",
+      "propertyType": "Not sure yet",
+      "budget": "Flexible / Discuss",
+      "clientName": "Adaeze Okafor",
+      "clientContact": "+2348012345678",
+      "basedIn": "Nigeria",
+      "notes": "Looking for a verified duplex with C of O.",
+      "reviewed": true,
+      "createdAt": "2026-11-13T13:45:41.692Z"
+    },
+    {
+      "id": "a99ac362-e706-4a6a-b64c-0498e8b00143",
+      "kind": "Enquiry",
+      "title": "MIRVAI",
+      "summary": "Victoria Island · Detached · 1 – 3 months · ₦250M – ₦500M",
+      "location": "Victoria Island",
+      "timeline": "1 – 3 months",
+      "propertyType": "Detached",
+      "budget": "₦250M – ₦500M",
+      "clientName": "Adaeze Okafor",
+      "clientContact": "+447700900123",
+      "basedIn": "Nigeria",
+      "reviewed": true,
+      "createdAt": "2026-11-13T13:40:33.776Z"
     }
   ]
 }

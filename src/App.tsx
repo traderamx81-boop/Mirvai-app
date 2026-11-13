@@ -2,18 +2,28 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AppScreen,
   createReviewRequest,
+  EnquiryPayload,
   filterHomes,
   homeById,
-  homes,
+  HomeListing,
   loadReviewState,
   markRequestAsReviewed,
   pathForView,
+  removeListing,
   resolveViewFromPath,
   ReviewState,
   saveReviewState,
   SurfaceView,
   toggleId,
+  upsertListing,
 } from './lib/courtyardReview';
+import {
+  fetchConvexSnapshot,
+  syncEnquiryCreate,
+  syncEnquiryReview,
+  syncListingCreateOrUpdate,
+  syncListingDelete,
+} from './lib/convexSync';
 import { ReviewWebsiteView } from './components/ReviewWebsiteView';
 import { ReviewAppView } from './components/ReviewAppView';
 import { ReviewTeamView } from './components/ReviewTeamView';
@@ -21,14 +31,19 @@ import { ActiveModal, ReviewDialogs } from './components/ReviewDialogs';
 
 const ACCEPTED_PORTRAIT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 const MAX_PORTRAIT_BYTES = 8 * 1024 * 1024;
+const SYNC_CHANNEL = 'mirvai-courtyard-sync';
 
 export function App() {
   const [state, setState] = useState<ReviewState>(() => loadReviewState());
-  const [view, setView] = useState<SurfaceView>(() => resolveViewFromPath(window.location.pathname));
+  const [view, setView] = useState<SurfaceView>(() =>
+    resolveViewFromPath(window.location.pathname, window.location.hash)
+  );
   const [appScreen, setAppScreen] = useState<AppScreen>('home');
   const [webFilter, setWebFilter] = useState<string>('all');
   const [webArea, setWebArea] = useState<string>('all');
+  const [webQuery, setWebQuery] = useState<string>('');
   const [appFilter, setAppFilter] = useState<string>('all');
+  const [appQuery, setAppQuery] = useState<string>('');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [portraitUrl, setPortraitUrl] = useState<string>('');
@@ -36,6 +51,16 @@ export function App() {
 
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const portraitRef = useRef<string>('');
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  const persistAndBroadcast = (nextState: ReviewState) => {
+    saveReviewState(nextState);
+    try {
+      channelRef.current?.postMessage(nextState);
+    } catch {
+      // BroadcastChannel unavailable in older runtimes
+    }
+  };
 
   useEffect(() => {
     saveReviewState(state);
@@ -45,18 +70,54 @@ export function App() {
     portraitRef.current = portraitUrl;
   }, [portraitUrl]);
 
+  // Cross-tab realtime sync + popstate routing + graceful Convex hydration
   useEffect(() => {
+    let mounted = true;
+
+    try {
+      const bc = new BroadcastChannel(SYNC_CHANNEL);
+      bc.onmessage = (event) => {
+        if (mounted && event.data && Array.isArray(event.data.listings)) {
+          setState(event.data as ReviewState);
+        }
+      };
+      channelRef.current = bc;
+    } catch {
+      // BroadcastChannel optional
+    }
+
+    const onStorage = () => {
+      if (mounted) {
+        setState(loadReviewState());
+      }
+    };
+
     const onPopState = () => {
       setMenuOpen(false);
       setActiveModal(null);
-      setView(resolveViewFromPath(window.location.pathname));
+      setView(resolveViewFromPath(window.location.pathname, window.location.hash));
     };
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, []);
 
-  useEffect(() => {
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('popstate', onPopState);
+    window.addEventListener('hashchange', onPopState);
+
+    void fetchConvexSnapshot().then((snapshot) => {
+      if (!mounted || !snapshot) return;
+      setState((prev) => ({
+        ...prev,
+        listings: snapshot.listings && snapshot.listings.length > 0 ? snapshot.listings : prev.listings,
+        drafts: snapshot.drafts ?? prev.drafts,
+        requests: snapshot.requests && snapshot.requests.length > 0 ? snapshot.requests : prev.requests,
+      }));
+    });
+
     return () => {
+      mounted = false;
+      channelRef.current?.close();
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('hashchange', onPopState);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       if (portraitRef.current) URL.revokeObjectURL(portraitRef.current);
     };
@@ -91,27 +152,35 @@ export function App() {
   };
 
   const webListings = useMemo(
-    () => filterHomes(webFilter, webArea, state.drafts, homes),
-    [webFilter, webArea, state.drafts]
+    () => filterHomes(webFilter, webArea, state.drafts, state.listings, webQuery),
+    [webFilter, webArea, state.drafts, state.listings, webQuery]
   );
 
   const appListings = useMemo(
-    () => filterHomes(appFilter, 'all', state.drafts, homes),
-    [appFilter, state.drafts]
+    () => filterHomes(appFilter, 'all', state.drafts, state.listings, appQuery),
+    [appFilter, state.drafts, state.listings, appQuery]
   );
 
   const savedListings = useMemo(
     () =>
       state.saved
-        .map((id) => homeById(id))
-        .filter((item): item is NonNullable<typeof item> =>
+        .map((id) => homeById(id, state.listings))
+        .filter((item): item is HomeListing =>
           Boolean(item && !state.drafts.includes(item.id))
         ),
-    [state.saved, state.drafts]
+    [state.saved, state.drafts, state.listings]
   );
 
+  const updateStateAndSync = (updater: (prev: ReviewState) => ReviewState) => {
+    setState((prev) => {
+      const next = updater(prev);
+      persistAndBroadcast(next);
+      return next;
+    });
+  };
+
   const handleToggleSave = (propertyId: string) => {
-    setState((prev) => ({
+    updateStateAndSync((prev) => ({
       ...prev,
       saved: toggleId(prev.saved, propertyId),
     }));
@@ -132,13 +201,36 @@ export function App() {
     setActiveModal({ type: 'contact' });
   };
 
-  const handleSubmitForm = (kind: 'viewing' | 'enquire', summary: string, propertyId?: string) => {
-    const newRequest = createReviewRequest(kind, summary, propertyId);
-    setState((prev) => ({
+  const handleSubmitForm = (
+    kind: 'viewing' | 'enquire',
+    summary: string,
+    propertyId?: string,
+    extra?: EnquiryPayload
+  ) => {
+    const newRequest = createReviewRequest(
+      kind,
+      summary,
+      propertyId,
+      undefined,
+      state.listings,
+      extra
+    );
+    updateStateAndSync((prev) => ({
       ...prev,
-      requests: [newRequest, ...prev.requests].slice(0, 40),
+      requests: [newRequest, ...prev.requests].slice(0, 100),
     }));
     setActiveModal({ type: 'submitted' });
+
+    void syncEnquiryCreate(newRequest).then((convexId) => {
+      if (convexId) {
+        updateStateAndSync((prev) => ({
+          ...prev,
+          requests: prev.requests.map((r) =>
+            r.id === newRequest.id ? { ...r, convexId } : r
+          ),
+        }));
+      }
+    });
   };
 
   const handleGoEnquiries = () => {
@@ -148,19 +240,71 @@ export function App() {
   };
 
   const handleMarkReviewed = (requestId: string) => {
-    setState((prev) => ({
+    const target = state.requests.find((r) => r.id === requestId);
+    updateStateAndSync((prev) => ({
       ...prev,
       requests: markRequestAsReviewed(prev.requests, requestId),
     }));
-    showToast('Sample request marked as reviewed.');
+    showToast('Enquiry marked as reviewed.');
+    if (target) {
+      void syncEnquiryReview(target, true);
+    }
   };
 
   const handleToggleInventoryDraft = (propertyId: string) => {
-    setState((prev) => ({
+    const willBeDraft = !state.drafts.includes(propertyId);
+    const listing = state.listings.find((item) => item.id === propertyId);
+
+    updateStateAndSync((prev) => ({
       ...prev,
       drafts: toggleId(prev.drafts, propertyId),
     }));
-    showToast('Sample inventory updated.');
+    showToast(willBeDraft ? 'Listing moved to draft.' : 'Listing published live.');
+
+    if (listing) {
+      void syncListingCreateOrUpdate('update', listing, willBeDraft);
+    }
+  };
+
+  const handleSaveListing = (listing: HomeListing, publish: boolean) => {
+    const isExisting = state.listings.some((item) => item.id === listing.id);
+    const isDraft = !publish;
+
+    updateStateAndSync((prev) => ({
+      ...prev,
+      listings: upsertListing(prev.listings, listing),
+      drafts: publish
+        ? prev.drafts.filter((id) => id !== listing.id)
+        : prev.drafts.includes(listing.id)
+          ? prev.drafts
+          : [...prev.drafts, listing.id],
+    }));
+
+    showToast(isExisting ? 'Listing updated.' : 'New listing created.');
+
+    void syncListingCreateOrUpdate(isExisting ? 'update' : 'add', listing, isDraft).then(
+      (convexId) => {
+        if (convexId && !listing.convexId) {
+          updateStateAndSync((prev) => ({
+            ...prev,
+            listings: prev.listings.map((item) =>
+              item.id === listing.id ? { ...item, convexId } : item
+            ),
+          }));
+        }
+      }
+    );
+  };
+
+  const handleDeleteListing = (listing: HomeListing) => {
+    updateStateAndSync((prev) => ({
+      ...prev,
+      listings: removeListing(prev.listings, listing.id),
+      drafts: prev.drafts.filter((id) => id !== listing.id),
+      saved: prev.saved.filter((id) => id !== listing.id),
+    }));
+    showToast('Listing deleted.');
+    void syncListingDelete(listing);
   };
 
   const handleMenuFilterSelect = (categoryId: string) => {
@@ -249,9 +393,16 @@ export function App() {
             hidden={false}
             webFilter={webFilter}
             webArea={webArea}
+            webQuery={webQuery}
             listings={webListings}
             onFilterChange={setWebFilter}
             onAreaChange={setWebArea}
+            onQueryChange={setWebQuery}
+            onResetFilters={() => {
+              setWebFilter('all');
+              setWebArea('all');
+              setWebQuery('');
+            }}
             onOpenMenu={() => setMenuOpen(true)}
             onEnquire={(id) => handleOpenForm('enquire', id)}
             onContact={handleOpenContact}
@@ -264,12 +415,14 @@ export function App() {
             hidden={false}
             appScreen={appScreen}
             appFilter={appFilter}
+            appQuery={appQuery}
             visibleListings={appListings}
             savedListings={savedListings}
             requests={state.requests}
             portraitUrl={portraitUrl}
             onSelectScreen={setAppScreen}
             onFilterChange={setAppFilter}
+            onQueryChange={setAppQuery}
             onJumpToWebsiteProperties={() => jumpToWebsiteSection('properties')}
             onOpenMenu={() => setMenuOpen(true)}
             onOpenProperty={handleOpenProperty}
@@ -282,10 +435,16 @@ export function App() {
         {view === 'team' && (
           <ReviewTeamView
             hidden={false}
+            listings={state.listings}
             requests={state.requests}
             drafts={state.drafts}
+            onNavigateWebsite={() => navigateToView('website', true)}
+            onNavigateApp={() => navigateToView('app', true)}
             onMarkReviewed={handleMarkReviewed}
             onToggleInventoryDraft={handleToggleInventoryDraft}
+            onSaveListing={handleSaveListing}
+            onDeleteListing={handleDeleteListing}
+            onNotify={showToast}
           />
         )}
       </main>
@@ -293,6 +452,7 @@ export function App() {
       <ReviewDialogs
         menuOpen={menuOpen}
         activeModal={activeModal}
+        listings={state.listings}
         savedIds={state.saved}
         toastMessage={toastMessage}
         onCloseMenu={() => setMenuOpen(false)}
